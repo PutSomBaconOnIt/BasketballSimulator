@@ -125,19 +125,24 @@ export function CoachingLineup() {
   const remainingMinutes = 240 - totalMinutes;
 
   const autoAdjustMinutes = () => {
-    // Auto-adjust: starters get 32 minutes each, distribute remaining to active bench players
+    // Auto-adjust: starters get 32 minutes each, 6th man gets 20-30 minutes based on position need
     const newStarterMinutes = [32, 32, 32, 32, 32];
     const totalStarterMinutes = 160;
-    const remainingMinutes = 240 - totalStarterMinutes; // 80 minutes for bench
     
-    // Only active bench players get minutes (slots 0-6: 6th man, role players, bench players)
-    // Inactive slots (7-9) get 0 minutes
-    const activeBenchSlots = 7; // Slots 0-6 are active
-    const minutesPerActiveBench = activeBenchSlots > 0 ? Math.floor(remainingMinutes / activeBenchSlots) : 0;
+    // 6th man gets 25 minutes (middle of 20-30 range)
+    const sixthManMinutes = 25;
+    
+    // Remaining minutes after starters and 6th man
+    const remainingAfterSixthMan = 240 - totalStarterMinutes - sixthManMinutes; // 55 minutes left
+    
+    // Distribute remaining minutes among role players and bench players (slots 1-6)
+    const activeRoleAndBenchSlots = 6; // Slots 1-6 (role players + bench players)
+    const minutesPerRoleAndBench = activeRoleAndBenchSlots > 0 ? Math.floor(remainingAfterSixthMan / activeRoleAndBenchSlots) : 0;
     
     const newBenchMinutes = Array(10).fill(0).map((_, index) => {
-      // Slots 0-6 get minutes, slots 7-9 (inactive) get 0
-      return index < 7 ? minutesPerActiveBench : 0;
+      if (index === 0) return sixthManMinutes; // 6th man gets 25 minutes
+      if (index >= 1 && index <= 6) return minutesPerRoleAndBench; // Role players and bench get equal shares
+      return 0; // Inactive slots get 0 minutes
     });
     
     setStarterMinutes(newStarterMinutes);
