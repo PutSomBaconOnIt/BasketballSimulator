@@ -298,7 +298,7 @@ export function CoachingLineup() {
   };
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="min-h-screen bg-background">
       <div className="bg-card border-b border-border p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -321,7 +321,7 @@ export function CoachingLineup() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="p-6">
         {/* Instructions */}
         {swapMode && !selectedPlayer && (
           <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
