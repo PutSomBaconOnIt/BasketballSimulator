@@ -9,43 +9,99 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Users, Bus, Dumbbell, Activity, Calendar } from "lucide-react";
 import type { Team, Player, Coach, Training } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 
 export function Roster() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [location] = useLocation();
-  const urlParams = new URLSearchParams(window.location.search);
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
   const teamFromUrl = urlParams.get('team');
 
+  // Manual data states
+  const [manualTeams, setManualTeams] = useState<Team[]>([]);
+  const [manualCoaches, setManualCoaches] = useState<Coach[]>([]);
+  const [manualTrainings, setManualTrainings] = useState<Training[]>([]);
+  const [manualPlayers, setManualPlayers] = useState<Player[]>([]);
 
   const { data: teams } = useQuery({
     queryKey: ["/api/teams"],
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
   const { data: coaches } = useQuery({
     queryKey: ["/api/coaches"],
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
   const { data: trainings } = useQuery({
     queryKey: ["/api/training"],
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
+
+  // Combined data using manual fallback
+  const teamsData = teams || manualTeams;
+  const coachesData = coaches || manualCoaches;
+  const trainingsData = trainings || manualTrainings;
 
   // Get user's team based on URL parameter, default to first team
   const userTeam = teamFromUrl 
-    ? teams?.find((team: Team) => team.id === teamFromUrl)
-    : teams?.[0] as Team;
+    ? teamsData?.find((team: Team) => team.id === teamFromUrl)
+    : teamsData?.[0] as Team;
 
-  console.log("Roster - Location:", location);
-  console.log("Roster - Team from URL:", teamFromUrl);
-  console.log("Roster - Teams:", teams);
-  console.log("Roster - User Team:", userTeam);
+  // Immediate data fetching on mount
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        // Fetch teams
+        const teamsRes = await fetch('/api/teams');
+        const teamsData = await teamsRes.json();
+        setManualTeams(teamsData);
+
+        // Fetch coaches
+        const coachesRes = await fetch('/api/coaches');
+        const coachesData = await coachesRes.json();
+        setManualCoaches(coachesData);
+
+        // Fetch trainings
+        const trainingsRes = await fetch('/api/training');
+        const trainingsData = await trainingsRes.json();
+        setManualTrainings(trainingsData);
+
+        // Fetch all players
+        const playersRes = await fetch('/api/players');
+        const playersData = await playersRes.json();
+        setManualPlayers(playersData);
+
+      } catch (err) {
+        console.error('Manual data fetch failed:', err);
+      }
+    };
+    
+    fetchAllData();
+  }, []);
 
   const { data: players } = useQuery({
     queryKey: ["/api/players/team", userTeam?.id],
     enabled: !!userTeam,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
+
+  // Combined players data
+  const playersData = players || manualPlayers;
+  
+  // Filter players for the current team
+  const teamPlayers = playersData?.filter((p: Player) => p.teamId === userTeam?.id) || [];
+
+  // Minimal logging for debugging
+  if (teamPlayers && teamPlayers.length > 0) {
+    console.log(`Roster - Loaded ${teamPlayers.length} players for ${userTeam?.name}`);
+  }
 
   const { data: games } = useQuery({
     queryKey: ["/api/games/team", userTeam?.id],
@@ -54,9 +110,7 @@ export function Roster() {
 
   const simulateGameMutation = useMutation({
     mutationFn: async (gameId: string) => {
-      return apiRequest(`/api/games/${gameId}/simulate`, {
-        method: "POST",
-      });
+      return apiRequest("POST", `/api/games/${gameId}/simulate`);
     },
     onSuccess: () => {
       toast({
@@ -88,20 +142,20 @@ export function Roster() {
   };
 
   // Get head coach
-  const headCoach = coaches?.find((coach: Coach) => coach.id === userTeam?.headCoachId);
+  const headCoach = coachesData?.find((coach: Coach) => coach.id === userTeam?.headCoachId);
 
   // Separate starters and bench
-  const starters = players?.filter((p: Player) => p.status === "active")
+  const starters = teamPlayers?.filter((p: Player) => p.status === "active")
     .sort((a: Player, b: Player) => b.overall - a.overall)
     .slice(0, 5) || [];
 
-  const bench = players?.filter((p: Player) => p.status === "active")
+  const bench = teamPlayers?.filter((p: Player) => p.status === "active")
     .sort((a: Player, b: Player) => b.overall - a.overall)
     .slice(5) || [];
 
   // Get active training sessions
-  const activeTrainings = trainings?.filter((t: Training) => 
-    !t.completed && players?.some((p: Player) => p.id === t.playerId)
+  const activeTrainings = trainingsData?.filter((t: Training) => 
+    !t.completed && teamPlayers?.some((p: Player) => p.id === t.playerId)
   ) || [];
 
   const getTrainingTypeIcon = (type: string) => {
