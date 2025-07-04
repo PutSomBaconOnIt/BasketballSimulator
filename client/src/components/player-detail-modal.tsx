@@ -20,8 +20,6 @@ function formatHeight(heightInches: number): string {
 export function PlayerDetailModal({ player, isOpen, onClose }: PlayerDetailModalProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   
-  console.log('PlayerDetailModal render:', { player: player?.name, isOpen });
-  
   if (!player) return null;
 
   const slides = [
@@ -44,7 +42,7 @@ export function PlayerDetailModal({ player, isOpen, onClose }: PlayerDetailModal
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px] bg-gray-900 border-gray-700 relative">
+      <DialogContent className="sm:max-w-[425px] bg-gray-900 border-gray-700 relative z-50">
         <DialogHeader>
           <div className="text-center">
             <DialogTitle className="text-xl font-bold text-white">

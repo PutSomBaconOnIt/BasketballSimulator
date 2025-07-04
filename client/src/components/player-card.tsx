@@ -74,7 +74,10 @@ export function PlayerCard({ player, onEdit, onTrade, onInfo, showActions = true
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={onInfo}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onInfo?.();
+                  }}
                   className="text-muted-foreground hover:text-blue-400"
                   title="View Player Details"
                 >

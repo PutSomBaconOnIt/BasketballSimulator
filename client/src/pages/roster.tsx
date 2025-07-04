@@ -31,7 +31,6 @@ export function Roster() {
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
 
   const handlePlayerInfo = (player: Player) => {
-    console.log('Player info clicked:', player.name);
     setSelectedPlayer(player);
     setIsPlayerModalOpen(true);
   };
