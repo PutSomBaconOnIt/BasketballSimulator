@@ -21,7 +21,7 @@ export function Dashboard() {
     queryKey: ["/api/games"],
   });
 
-  // Get user's team based on URL parameter or default to first team
+  // Get user's team based on URL parameter, default to first team
   const userTeam = selectedTeamId 
     ? teams?.find((team: Team) => team.id === selectedTeamId)
     : teams?.[0] as Team;

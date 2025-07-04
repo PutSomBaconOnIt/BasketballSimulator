@@ -4,7 +4,7 @@ import { PlayerCard } from "@/components/player-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Users, Bus, Dumbbell, Activity, Calendar } from "lucide-react";
 import type { Team, Player, Coach, Training } from "@shared/schema";
@@ -18,7 +18,7 @@ export function Roster() {
   const [location] = useLocation();
   const urlParams = new URLSearchParams(location.split('?')[1] || '');
   const teamFromUrl = urlParams.get('team');
-  const [selectedTeamId, setSelectedTeamId] = useState<string>(teamFromUrl || "");
+
 
   const { data: teams } = useQuery({
     queryKey: ["/api/teams"],
@@ -32,8 +32,10 @@ export function Roster() {
     queryKey: ["/api/training"],
   });
 
-  // Get user's team based on URL parameter or selection, default to first team
-  const userTeam = teams?.find((team: Team) => team.id === (teamFromUrl || selectedTeamId)) || teams?.[0] as Team;
+  // Get user's team based on URL parameter, default to first team
+  const userTeam = teamFromUrl 
+    ? teams?.find((team: Team) => team.id === teamFromUrl)
+    : teams?.[0] as Team;
 
   const { data: players } = useQuery({
     queryKey: ["/api/players/team", userTeam?.id],
@@ -128,24 +130,7 @@ export function Roster() {
     <div className="flex-1 flex flex-col">
       <Header team={userTeam} onSimulateGame={handleSimulateGame} />
       
-      {/* Team Selection */}
-      <div className="p-4 border-b border-border bg-card">
-        <div className="flex items-center space-x-4">
-          <label className="text-sm font-medium text-foreground">Select Team:</label>
-          <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Choose a team..." />
-            </SelectTrigger>
-            <SelectContent>
-              {teams?.map((team: Team) => (
-                <SelectItem key={team.id} value={team.id}>
-                  {team.city} {team.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+
       
       <div className="flex-1 overflow-y-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

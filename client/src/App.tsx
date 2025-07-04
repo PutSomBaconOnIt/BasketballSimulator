@@ -25,75 +25,91 @@ function App() {
           
           {/* Game Pages - With Sidebar Layout */}
           <Route path="/dashboard">
-            <div className="flex h-screen overflow-hidden bg-background">
-              <Sidebar />
-              <main className="flex-1 overflow-y-auto">
-                <Dashboard />
-              </main>
-            </div>
+            {() => (
+              <div className="flex h-screen overflow-hidden bg-background">
+                <Sidebar />
+                <main className="flex-1 overflow-y-auto">
+                  <Dashboard />
+                </main>
+              </div>
+            )}
           </Route>
           
           <Route path="/roster">
-            <div className="flex h-screen overflow-hidden bg-background">
-              <Sidebar />
-              <main className="flex-1 overflow-y-auto">
-                <Roster />
-              </main>
-            </div>
+            {() => (
+              <div className="flex h-screen overflow-hidden bg-background">
+                <Sidebar />
+                <main className="flex-1 overflow-y-auto">
+                  <Roster />
+                </main>
+              </div>
+            )}
           </Route>
           
           <Route path="/players">
-            <div className="flex h-screen overflow-hidden bg-background">
-              <Sidebar />
-              <main className="flex-1 overflow-y-auto">
-                <PlayerDatabase />
-              </main>
-            </div>
+            {() => (
+              <div className="flex h-screen overflow-hidden bg-background">
+                <Sidebar />
+                <main className="flex-1 overflow-y-auto">
+                  <PlayerDatabase />
+                </main>
+              </div>
+            )}
           </Route>
           
           <Route path="/draft">
-            <div className="flex h-screen overflow-hidden bg-background">
-              <Sidebar />
-              <main className="flex-1 overflow-y-auto">
-                <Draft />
-              </main>
-            </div>
+            {() => (
+              <div className="flex h-screen overflow-hidden bg-background">
+                <Sidebar />
+                <main className="flex-1 overflow-y-auto">
+                  <Draft />
+                </main>
+              </div>
+            )}
           </Route>
           
           <Route path="/trades">
-            <div className="flex h-screen overflow-hidden bg-background">
-              <Sidebar />
-              <main className="flex-1 overflow-y-auto">
-                <Trades />
-              </main>
-            </div>
+            {() => (
+              <div className="flex h-screen overflow-hidden bg-background">
+                <Sidebar />
+                <main className="flex-1 overflow-y-auto">
+                  <Trades />
+                </main>
+              </div>
+            )}
           </Route>
           
           <Route path="/training">
-            <div className="flex h-screen overflow-hidden bg-background">
-              <Sidebar />
-              <main className="flex-1 overflow-y-auto">
-                <Training />
-              </main>
-            </div>
+            {() => (
+              <div className="flex h-screen overflow-hidden bg-background">
+                <Sidebar />
+                <main className="flex-1 overflow-y-auto">
+                  <Training />
+                </main>
+              </div>
+            )}
           </Route>
           
           <Route path="/free-agency">
-            <div className="flex h-screen overflow-hidden bg-background">
-              <Sidebar />
-              <main className="flex-1 overflow-y-auto">
-                <FreeAgency />
-              </main>
-            </div>
+            {() => (
+              <div className="flex h-screen overflow-hidden bg-background">
+                <Sidebar />
+                <main className="flex-1 overflow-y-auto">
+                  <FreeAgency />
+                </main>
+              </div>
+            )}
           </Route>
           
           <Route path="/statistics">
-            <div className="flex h-screen overflow-hidden bg-background">
-              <Sidebar />
-              <main className="flex-1 overflow-y-auto">
-                <Statistics />
-              </main>
-            </div>
+            {() => (
+              <div className="flex h-screen overflow-hidden bg-background">
+                <Sidebar />
+                <main className="flex-1 overflow-y-auto">
+                  <Statistics />
+                </main>
+              </div>
+            )}
           </Route>
           
           <Route component={NotFound} />
