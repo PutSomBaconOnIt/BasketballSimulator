@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -11,6 +13,47 @@ import {
 
 export function MainMenu() {
   const [, setLocation] = useLocation();
+  const [isPreloading, setIsPreloading] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Pre-load critical data immediately on component mount
+  useEffect(() => {
+    const preloadData = async () => {
+      try {
+        setIsPreloading(true);
+        
+        // Pre-fetch teams data and cache it
+        const teamsRes = await fetch('/api/teams');
+        const teamsData = await teamsRes.json();
+        
+        // Cache in React Query for instant access
+        queryClient.setQueryData(["/api/teams"], teamsData);
+        
+        // Pre-fetch players data for faster roster/dashboard loading
+        const playersRes = await fetch('/api/players');
+        const playersData = await playersRes.json();
+        queryClient.setQueryData(["/api/players"], playersData);
+        
+        // Pre-fetch games data for dashboard
+        const gamesRes = await fetch('/api/games');
+        const gamesData = await gamesRes.json();
+        queryClient.setQueryData(["/api/games"], gamesData);
+        
+        console.log("Main Menu - Pre-loaded all critical data for instant navigation");
+      } catch (err) {
+        console.error('Pre-loading failed:', err);
+      } finally {
+        setIsPreloading(false);
+      }
+    };
+    
+    preloadData();
+  }, [queryClient]);
+
+  const handleStartNewSeason = () => {
+    // Navigation should now be instant since data is pre-loaded
+    setLocation('/team-selection');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
@@ -34,10 +77,11 @@ export function MainMenu() {
             <CardContent className="p-6">
               <Button 
                 className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-4 text-lg"
-                onClick={() => setLocation('/team-selection')}
+                onClick={handleStartNewSeason}
+                disabled={isPreloading}
               >
                 <Play className="w-6 h-6 mr-3" />
-                Start New Season
+                {isPreloading ? "Loading..." : "Start New Season"}
               </Button>
             </CardContent>
           </Card>

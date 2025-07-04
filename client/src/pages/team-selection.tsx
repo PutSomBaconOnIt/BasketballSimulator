@@ -15,24 +15,28 @@ export function TeamSelection() {
 
   const { data: teams, isLoading, error } = useQuery({
     queryKey: ["/api/teams"],
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 10, // 10 minutes - longer since pre-loaded
     refetchOnWindowFocus: false,
+    // No need for placeholderData since main menu pre-loads this
   });
 
-  // Immediate manual fetch on mount for faster loading
+  // Immediate manual fetch on mount for faster loading (fallback if pre-loading failed)
   useEffect(() => {
     const fetchTeams = async () => {
-      try {
-        const res = await fetch('/api/teams');
-        const data = await res.json();
-        setManualTeams(data);
-      } catch (err) {
-        console.error('Manual fetch failed:', err);
+      // Only fetch if React Query doesn't have data
+      if (!teams) {
+        try {
+          const res = await fetch('/api/teams');
+          const data = await res.json();
+          setManualTeams(data);
+        } catch (err) {
+          console.error('Manual fetch failed:', err);
+        }
       }
     };
     
     fetchTeams();
-  }, []); // Run immediately on mount
+  }, [teams]); // Include teams dependency
 
   const teamsData = teams || manualTeams;
   const selectedTeam = teamsData?.find((team: Team) => team.id === selectedTeamId);
