@@ -181,7 +181,7 @@ export function CoachingLineup() {
     // Remaining minutes after starters and 6th man
     const remainingAfterSixthMan = 240 - totalStarterMinutes - sixthManMinutes; // 55 minutes left
     
-    // Dynamic minute allocation based on player overall ratings and roles
+    // Dynamic minute allocation based on player overall ratings, roles, and position balance
     const calculateDynamicMinutes = () => {
       // Get all active bench players (slots 0-4)
       const activeBenchPlayers = benchList.slice(0, 5).filter(player => player !== null);
@@ -191,14 +191,38 @@ export function CoachingLineup() {
         return Array(10).fill(0);
       }
 
-      // Calculate base minutes for each role
+      // Analyze position distribution across all players (starters + bench)
+      const allPlayers = [...startersList, ...benchList].filter((p: Player | null) => p !== null) as Player[];
+      const positionCounts = {
+        PG: allPlayers.filter(p => p.position === 'PG').length,
+        SG: allPlayers.filter(p => p.position === 'SG').length,
+        SF: allPlayers.filter(p => p.position === 'SF').length,
+        PF: allPlayers.filter(p => p.position === 'PF').length,
+        C: allPlayers.filter(p => p.position === 'C').length
+      };
+
+      // Calculate position-based minute targets for bench
+      const getPositionMinuteTarget = (position: string) => {
+        const startersInPosition = startersList.filter((p: Player | null) => p && p.position === position).length;
+        const benchInPosition = activeBenchPlayers.filter(p => p.position === position).length;
+        
+        // Ensure each position gets adequate backup minutes
+        if (startersInPosition === 1 && benchInPosition >= 1) {
+          return Math.max(15, totalBenchMinutes * 0.25); // At least 25% of bench minutes for single-starter positions
+        } else if (startersInPosition >= 2 && benchInPosition >= 1) {
+          return totalBenchMinutes * 0.15; // 15% for positions with multiple starters
+        }
+        return 0;
+      };
+
+      // Calculate base minutes for each role with position adjustments
       const roleBaselines = {
         6: 28,    // 6th man baseline
         role: 20, // Role player baseline 
         bench: 12 // Bench player baseline
       };
 
-      // Calculate minutes for each player based on overall rating and role
+      // Calculate minutes for each player based on overall rating, role, and position needs
       const playerMinutes = Array(10).fill(0);
       let allocatedMinutes = 0;
 
@@ -210,22 +234,35 @@ export function CoachingLineup() {
         else if (index <= 2) baseMinutes = roleBaselines.role;
         else baseMinutes = roleBaselines.bench;
 
+        // Position-based adjustment
+        const positionTarget = getPositionMinuteTarget(player.position);
+        const samePositionBenchPlayers = activeBenchPlayers.filter(p => p.position === player.position);
+        if (samePositionBenchPlayers.length > 0) {
+          const positionBonus = positionTarget / samePositionBenchPlayers.length;
+          baseMinutes += positionBonus * 0.3; // 30% weight to position needs
+        }
+
         // Adjust based on overall rating relative to position average
         const positionPlayers = activeBenchPlayers.filter(p => p && p.position === player.position);
         if (positionPlayers.length > 1) {
           const avgOverall = positionPlayers.reduce((sum, p) => sum + p.overall, 0) / positionPlayers.length;
           const overallDiff = player.overall - avgOverall;
           
-          // Adjust minutes based on rating difference (+/- 2 minutes per overall point difference)
-          const adjustment = Math.round(overallDiff * 1.5);
+          // Adjust minutes based on rating difference (+/- 1.5 minutes per overall point difference)
+          const adjustment = Math.round(overallDiff * 1.2);
           baseMinutes = Math.max(5, Math.min(35, baseMinutes + adjustment));
         }
 
-        playerMinutes[index] = baseMinutes;
-        allocatedMinutes += baseMinutes;
+        // Special boost for underrepresented positions (like centers)
+        if (positionCounts[player.position as keyof typeof positionCounts] <= 2) {
+          baseMinutes *= 1.15; // 15% bonus for scarce positions
+        }
+
+        playerMinutes[index] = Math.round(baseMinutes);
+        allocatedMinutes += playerMinutes[index];
       });
 
-      // Redistribute to hit exactly 80 minutes
+      // Redistribute to hit exactly the target total
       const difference = totalBenchMinutes - allocatedMinutes;
       if (difference !== 0) {
         // Distribute difference proportionally among active players
@@ -237,7 +274,7 @@ export function CoachingLineup() {
         });
       }
 
-      // Final adjustment to ensure exactly 80 minutes
+      // Final adjustment to ensure exactly the right total
       const finalTotal = playerMinutes.slice(0, 5).reduce((sum, mins) => sum + mins, 0);
       const finalDiff = totalBenchMinutes - finalTotal;
       if (finalDiff !== 0) {
