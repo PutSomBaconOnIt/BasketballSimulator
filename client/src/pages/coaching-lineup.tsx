@@ -479,7 +479,7 @@ export function CoachingLineup() {
                   className="bg-primary hover:bg-primary/90"
                 >
                   <Target className="w-4 h-4 mr-2" />
-                  Smart Allocation
+                  Auto-Adjust
                 </Button>
               </div>
             </CardContent>
