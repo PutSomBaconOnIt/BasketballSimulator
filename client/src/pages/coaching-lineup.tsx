@@ -172,31 +172,31 @@ export function CoachingLineup() {
                   <div key={player.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
                     selectedPlayer?.id === player.id ? 'bg-primary/20 border-2 border-primary' : 'bg-muted hover:bg-muted/70'
                   }`}>
-                    <div className="flex items-center space-x-3 flex-1">
+                    <div className="flex items-center space-x-2 flex-1">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleViewPlayerCard(player)}
-                        className="w-8 h-8 p-0 hover:bg-primary/20 rounded-full flex-shrink-0"
+                        className="w-6 h-6 p-0 hover:bg-primary/20 rounded-full flex-shrink-0"
                       >
-                        <Info className="w-4 h-4 text-muted-foreground hover:text-primary" />
+                        <Info className="w-3 h-3 text-muted-foreground hover:text-primary" />
                       </Button>
-                      <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-primary font-semibold text-sm">{player.jerseyNumber}</span>
+                      <div className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-primary font-semibold text-xs">{player.jerseyNumber}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-foreground font-medium truncate">{player.name}</div>
+                        <div className="text-foreground font-medium text-sm truncate">{player.name}</div>
                         <div className="text-xs text-muted-foreground">{player.position} • OVR {player.overall}</div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-1 flex-shrink-0">
+                    <div className="flex items-center space-x-0.5 flex-shrink-0">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => adjustStarterMinutes(index, -1)}
-                        className="w-6 h-6 p-0 hover:bg-red-500/20 rounded"
+                        className="w-5 h-5 p-0 hover:bg-red-500/20 rounded"
                       >
-                        <Minus className="w-3 h-3 text-red-500" />
+                        <Minus className="w-2.5 h-2.5 text-red-500" />
                       </Button>
                       <input 
                         type="number" 
@@ -208,17 +208,17 @@ export function CoachingLineup() {
                         }}
                         min="0" 
                         max="48" 
-                        className="w-12 px-1 py-1 text-xs text-center bg-background border border-border rounded focus:ring-2 focus:ring-primary"
+                        className="w-10 px-1 py-0.5 text-xs text-center bg-background border border-border rounded focus:ring-1 focus:ring-primary"
                       />
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => adjustStarterMinutes(index, 1)}
-                        className="w-6 h-6 p-0 hover:bg-green-500/20 rounded"
+                        className="w-5 h-5 p-0 hover:bg-green-500/20 rounded"
                       >
-                        <Plus className="w-3 h-3 text-green-500" />
+                        <Plus className="w-2.5 h-2.5 text-green-500" />
                       </Button>
-                      <span className="text-xs text-muted-foreground">min</span>
+                      <span className="text-xs text-muted-foreground ml-1">min</span>
                     </div>
                   </div>
                 ))}
@@ -256,7 +256,7 @@ export function CoachingLineup() {
                     }`}
                     onClick={() => handlePlayerSwap(player)}
                   >
-                    <div className="flex items-center space-x-3 flex-1">
+                    <div className="flex items-center space-x-2 flex-1">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -264,19 +264,19 @@ export function CoachingLineup() {
                           e.stopPropagation();
                           handleViewPlayerCard(player);
                         }}
-                        className="w-8 h-8 p-0 hover:bg-primary/20 rounded-full flex-shrink-0"
+                        className="w-6 h-6 p-0 hover:bg-primary/20 rounded-full flex-shrink-0"
                       >
-                        <Info className="w-4 h-4 text-muted-foreground hover:text-primary" />
+                        <Info className="w-3 h-3 text-muted-foreground hover:text-primary" />
                       </Button>
-                      <div className="w-8 h-8 bg-secondary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-secondary font-semibold text-sm">{player.jerseyNumber}</span>
+                      <div className="w-6 h-6 bg-secondary/20 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-secondary font-semibold text-xs">{player.jerseyNumber}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-foreground font-medium truncate">{player.name}</div>
+                        <div className="text-foreground font-medium text-sm truncate">{player.name}</div>
                         <div className="text-xs text-muted-foreground">{player.position} • OVR {player.overall}</div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-1 flex-shrink-0">
+                    <div className="flex items-center space-x-0.5 flex-shrink-0">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -284,9 +284,9 @@ export function CoachingLineup() {
                           e.stopPropagation();
                           adjustBenchMinutes(index, -1);
                         }}
-                        className="w-6 h-6 p-0 hover:bg-red-500/20 rounded"
+                        className="w-5 h-5 p-0 hover:bg-red-500/20 rounded"
                       >
-                        <Minus className="w-3 h-3 text-red-500" />
+                        <Minus className="w-2.5 h-2.5 text-red-500" />
                       </Button>
                       <input 
                         type="number" 
@@ -298,7 +298,7 @@ export function CoachingLineup() {
                         }}
                         min="0" 
                         max="48" 
-                        className="w-12 px-1 py-1 text-xs text-center bg-background border border-border rounded focus:ring-2 focus:ring-primary"
+                        className="w-10 px-1 py-0.5 text-xs text-center bg-background border border-border rounded focus:ring-1 focus:ring-primary"
                         onClick={(e) => e.stopPropagation()}
                       />
                       <Button
@@ -308,11 +308,11 @@ export function CoachingLineup() {
                           e.stopPropagation();
                           adjustBenchMinutes(index, 1);
                         }}
-                        className="w-6 h-6 p-0 hover:bg-green-500/20 rounded"
+                        className="w-5 h-5 p-0 hover:bg-green-500/20 rounded"
                       >
-                        <Plus className="w-3 h-3 text-green-500" />
+                        <Plus className="w-2.5 h-2.5 text-green-500" />
                       </Button>
-                      <span className="text-xs text-muted-foreground">min</span>
+                      <span className="text-xs text-muted-foreground ml-1">min</span>
                     </div>
                   </div>
                   ))
