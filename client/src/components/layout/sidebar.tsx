@@ -18,6 +18,7 @@ const getNavigation = (teamId?: string) => {
   return [
     { name: "Dashboard", href: `/dashboard${teamParam}`, icon: Home },
     { name: "Team Roster", href: `/roster${teamParam}`, icon: Users },
+    { name: "Coaching", href: `/coaching${teamParam}`, icon: Handshake },
     { name: "Player Database", href: `/players${teamParam}`, icon: Search },
     { name: "Draft Room", href: `/draft${teamParam}`, icon: Trophy },
     { name: "Trades", href: `/trades${teamParam}`, icon: ArrowLeftRight },
