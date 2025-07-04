@@ -42,37 +42,37 @@ export function PlayerDetailModal({ player, isOpen, onClose }: PlayerDetailModal
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px] bg-gray-900 border-gray-700">
+      <DialogContent className="sm:max-w-[425px] bg-gray-900 border-gray-700 relative">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={prevSlide}
-              disabled={currentSlide === 0}
-              className="p-1 h-8 w-8 text-gray-400 hover:text-white"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            
-            <div className="text-center">
-              <DialogTitle className="text-xl font-bold text-white">
-                {player.name}
-              </DialogTitle>
-              <p className="text-sm text-gray-400">{slides[currentSlide].title}</p>
-            </div>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={nextSlide}
-              disabled={currentSlide === slides.length - 1}
-              className="p-1 h-8 w-8 text-gray-400 hover:text-white"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+          <div className="text-center">
+            <DialogTitle className="text-xl font-bold text-white">
+              {player.name}
+            </DialogTitle>
+            <p className="text-sm text-gray-400">{slides[currentSlide].title}</p>
           </div>
         </DialogHeader>
+
+        {/* Left Arrow - Centered on side */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={prevSlide}
+          disabled={currentSlide === 0}
+          className="absolute left-2 top-1/2 transform -translate-y-1/2 p-2 h-10 w-10 text-gray-400 hover:text-white z-10"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+
+        {/* Right Arrow - Centered on side */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={nextSlide}
+          disabled={currentSlide === slides.length - 1}
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 h-10 w-10 text-gray-400 hover:text-white z-10"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </Button>
         
         <div className="space-y-6">
           {/* Player Name and Position */}
