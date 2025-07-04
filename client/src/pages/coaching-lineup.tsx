@@ -331,11 +331,15 @@ export function CoachingLineup() {
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {starterMinutes.reduce((a, b) => a + b, 0) + 
-                     benchMinutes.slice(0, benchList.length).reduce((a, b) => a + b, 0)}
+                  <div className={`text-2xl font-bold ${
+                    240 - (starterMinutes.reduce((a, b) => a + b, 0) + 
+                           benchMinutes.slice(0, benchList.length).reduce((a, b) => a + b, 0)) >= 0 
+                    ? 'text-green-500' : 'text-red-500'
+                  }`}>
+                    {240 - (starterMinutes.reduce((a, b) => a + b, 0) + 
+                            benchMinutes.slice(0, benchList.length).reduce((a, b) => a + b, 0))}
                   </div>
-                  <div className="text-sm text-muted-foreground">Total Minutes</div>
+                  <div className="text-sm text-muted-foreground">Minutes Remaining</div>
                 </div>
                 
                 <div className="text-center">
