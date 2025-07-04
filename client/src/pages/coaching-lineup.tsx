@@ -16,6 +16,66 @@ export function CoachingLineup() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [starterMinutes, setStarterMinutes] = useState<number[]>([32, 35, 30, 36, 34]);
   const [benchMinutes, setBenchMinutes] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+  // Smart minute allocation based on position matching and overall rating
+  const allocateBenchMinutes = () => {
+    const starterPositions = startersList.map(player => player.position);
+    const newBenchMinutes = [...benchMinutes];
+    
+    // Calculate remaining minutes after starters
+    const starterTotal = starterMinutes.reduce((a, b) => a + b, 0);
+    const remainingMinutes = 240 - starterTotal;
+    
+    // Create position priority map based on starters
+    const positionPriority: { [key: string]: number } = {};
+    starterPositions.forEach(pos => {
+      positionPriority[pos] = (positionPriority[pos] || 0) + 1;
+    });
+    
+    // Sort bench players by: 1) Position match priority, 2) Overall rating
+    const benchWithPriority = benchList.map((player, index) => ({
+      player,
+      index,
+      positionPriority: positionPriority[player.position] || 0,
+      overall: player.overall
+    })).sort((a, b) => {
+      if (a.positionPriority !== b.positionPriority) {
+        return b.positionPriority - a.positionPriority; // Higher priority first
+      }
+      return b.overall - a.overall; // Higher overall first
+    });
+    
+    // Distribute minutes based on priority
+    let minutesToDistribute = Math.min(remainingMinutes, 80); // Max 80 minutes for bench
+    
+    // Top tier players (matching positions, high overall)
+    const topTier = benchWithPriority.slice(0, 3);
+    topTier.forEach(({ index }) => {
+      const allocation = Math.min(15, minutesToDistribute);
+      newBenchMinutes[index] = allocation;
+      minutesToDistribute -= allocation;
+    });
+    
+    // Second tier players (some minutes)
+    const secondTier = benchWithPriority.slice(3, 6);
+    secondTier.forEach(({ index }) => {
+      const allocation = Math.min(8, minutesToDistribute);
+      newBenchMinutes[index] = allocation;
+      minutesToDistribute -= allocation;
+    });
+    
+    // Distribute remaining minutes to top performers
+    let remainingIndex = 0;
+    while (minutesToDistribute > 0 && remainingIndex < benchWithPriority.length) {
+      const { index } = benchWithPriority[remainingIndex];
+      const canAdd = Math.min(5, minutesToDistribute);
+      newBenchMinutes[index] += canAdd;
+      minutesToDistribute -= canAdd;
+      remainingIndex++;
+    }
+    
+    setBenchMinutes(newBenchMinutes);
+  };
   
   const { data: players } = useQuery({
     queryKey: ["/api/players"],
@@ -411,6 +471,16 @@ export function CoachingLineup() {
                   </div>
                   <div className="text-sm text-muted-foreground">Rotation Usage</div>
                 </div>
+              </div>
+              
+              <div className="mt-6 flex justify-center">
+                <Button 
+                  onClick={allocateBenchMinutes}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  <Target className="w-4 h-4 mr-2" />
+                  Smart Allocation
+                </Button>
               </div>
             </CardContent>
           </Card>
