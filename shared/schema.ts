@@ -6,6 +6,8 @@ export const PlayerStatus = z.enum(["active", "injured", "suspended", "retired"]
 export const GameStatus = z.enum(["scheduled", "in_progress", "completed"]);
 export const TradeStatus = z.enum(["pending", "accepted", "rejected", "completed"]);
 export const TrainingType = z.enum(["strength", "shooting", "defense", "speed", "endurance"]);
+export const ContractOfferStatus = z.enum(["pending", "accepted", "rejected", "expired", "withdrawn"]);
+export const ContractType = z.enum(["rookie", "veteran", "max", "minimum", "extension"]);
 
 // Player Schema
 export const playerSchema = z.object({
@@ -207,6 +209,40 @@ export const draftSchema = z.object({
   updatedAt: z.date().default(() => new Date()),
 });
 
+// Contract Offer Schema
+export const contractOfferSchema = z.object({
+  id: z.string(),
+  playerId: z.string(),
+  teamId: z.string(),
+  
+  // Contract terms
+  contractType: ContractType,
+  yearsOffered: z.number().min(1).max(10),
+  totalValue: z.number().min(0),
+  annualSalary: z.number().min(0),
+  
+  // Offer details
+  signingBonus: z.number().min(0).default(0),
+  teamOption: z.boolean().default(false), // Team option for final year
+  playerOption: z.boolean().default(false), // Player option for final year
+  noTradeClause: z.boolean().default(false),
+  
+  // Status
+  status: ContractOfferStatus.default("pending"),
+  offerExpiresAt: z.date(),
+  
+  // Player response
+  playerInterest: z.number().min(0).max(100).nullable(), // How interested the player is (0-100)
+  counterOffer: z.object({
+    yearsWanted: z.number().min(1).max(10),
+    totalValueWanted: z.number().min(0),
+    demands: z.array(z.string()).default([]),
+  }).nullable(),
+  
+  createdAt: z.date().default(() => new Date()),
+  updatedAt: z.date().default(() => new Date()),
+});
+
 // Insert schemas
 export const insertPlayerSchema = playerSchema.omit({ id: true, createdAt: true, updatedAt: true });
 export const insertTeamSchema = teamSchema.omit({ id: true, createdAt: true, updatedAt: true });
@@ -216,6 +252,7 @@ export const insertTradeSchema = tradeSchema.omit({ id: true, createdAt: true, u
 export const insertTrainingSchema = trainingSchema.omit({ id: true, createdAt: true, updatedAt: true });
 export const insertSeasonSchema = seasonSchema.omit({ id: true, createdAt: true, updatedAt: true });
 export const insertDraftSchema = draftSchema.omit({ id: true, createdAt: true, updatedAt: true });
+export const insertContractOfferSchema = contractOfferSchema.omit({ id: true, createdAt: true, updatedAt: true });
 
 // Types
 export type Player = z.infer<typeof playerSchema>;
@@ -226,6 +263,7 @@ export type Trade = z.infer<typeof tradeSchema>;
 export type Training = z.infer<typeof trainingSchema>;
 export type Season = z.infer<typeof seasonSchema>;
 export type Draft = z.infer<typeof draftSchema>;
+export type ContractOffer = z.infer<typeof contractOfferSchema>;
 
 export type InsertPlayer = z.infer<typeof insertPlayerSchema>;
 export type InsertTeam = z.infer<typeof insertTeamSchema>;
@@ -235,3 +273,4 @@ export type InsertTrade = z.infer<typeof insertTradeSchema>;
 export type InsertTraining = z.infer<typeof insertTrainingSchema>;
 export type InsertSeason = z.infer<typeof insertSeasonSchema>;
 export type InsertDraft = z.infer<typeof insertDraftSchema>;
+export type InsertContractOffer = z.infer<typeof insertContractOfferSchema>;

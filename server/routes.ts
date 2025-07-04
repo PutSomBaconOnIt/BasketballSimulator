@@ -3,7 +3,7 @@ import { createServer } from "http";
 import { storage } from "./storage";
 import { 
   insertPlayerSchema, insertTeamSchema, insertCoachSchema, insertGameSchema,
-  insertTradeSchema, insertTrainingSchema, insertSeasonSchema, insertDraftSchema
+  insertTradeSchema, insertTrainingSchema, insertSeasonSchema, insertDraftSchema, insertContractOfferSchema
 } from "@shared/schema";
 import { simulateGame } from "./services/simulation";
 
@@ -427,6 +427,115 @@ router.delete("/api/draft/:id", async (req, res) => {
   const deleted = await storage.deleteDraft(req.params.id);
   if (!deleted) {
     return res.status(404).json({ error: "Draft not found" });
+  }
+  res.status(204).send();
+});
+
+// Contract Offers
+router.get("/api/contract-offers", async (req, res) => {
+  const offers = await storage.getContractOffers();
+  res.json(offers);
+});
+
+router.get("/api/contract-offers/active", async (req, res) => {
+  const offers = await storage.getActiveContractOffers();
+  res.json(offers);
+});
+
+router.get("/api/contract-offers/:id", async (req, res) => {
+  const offer = await storage.getContractOffer(req.params.id);
+  if (!offer) {
+    return res.status(404).json({ error: "Contract offer not found" });
+  }
+  res.json(offer);
+});
+
+router.get("/api/contract-offers/player/:playerId", async (req, res) => {
+  const offers = await storage.getContractOffersByPlayer(req.params.playerId);
+  res.json(offers);
+});
+
+router.get("/api/contract-offers/team/:teamId", async (req, res) => {
+  const offers = await storage.getContractOffersByTeam(req.params.teamId);
+  res.json(offers);
+});
+
+router.post("/api/contract-offers", async (req, res) => {
+  try {
+    const data = insertContractOfferSchema.parse(req.body);
+    const offer = await storage.createContractOffer(data);
+    res.status(201).json(offer);
+  } catch (error) {
+    res.status(400).json({ error: "Invalid contract offer data" });
+  }
+});
+
+router.put("/api/contract-offers/:id", async (req, res) => {
+  try {
+    const offer = await storage.updateContractOffer(req.params.id, req.body);
+    if (!offer) {
+      return res.status(404).json({ error: "Contract offer not found" });
+    }
+    res.json(offer);
+  } catch (error) {
+    res.status(400).json({ error: "Invalid contract offer data" });
+  }
+});
+
+router.post("/api/contract-offers/:id/accept", async (req, res) => {
+  try {
+    const offer = await storage.getContractOffer(req.params.id);
+    if (!offer) {
+      return res.status(404).json({ error: "Contract offer not found" });
+    }
+
+    // Update offer status to accepted
+    const updatedOffer = await storage.updateContractOffer(req.params.id, {
+      status: "accepted"
+    });
+
+    // Update player contract
+    const player = await storage.getPlayer(offer.playerId);
+    if (player) {
+      await storage.updatePlayer(offer.playerId, {
+        teamId: offer.teamId,
+        salary: offer.annualSalary,
+        contractYears: offer.yearsOffered
+      });
+
+      // Update team salary
+      const team = await storage.getTeam(offer.teamId);
+      if (team) {
+        await storage.updateTeam(offer.teamId, {
+          currentSalary: team.currentSalary + offer.annualSalary
+        });
+      }
+    }
+
+    res.json(updatedOffer);
+  } catch (error) {
+    res.status(400).json({ error: "Failed to accept contract offer" });
+  }
+});
+
+router.post("/api/contract-offers/:id/reject", async (req, res) => {
+  try {
+    const updatedOffer = await storage.updateContractOffer(req.params.id, {
+      status: "rejected"
+    });
+    if (!updatedOffer) {
+      return res.status(404).json({ error: "Contract offer not found" });
+    }
+    res.json(updatedOffer);
+  } catch (error) {
+    res.status(400).json({ error: "Failed to reject contract offer" });
+  }
+});
+
+router.delete("/api/contract-offers/:id", async (req, res) => {
+  const deleted = await storage.deleteContractOffer(req.params.id);
+  if (!deleted) {
+    return res.status(404).json({ error: "Contract offer not found" });
   }
   res.status(204).send();
 });

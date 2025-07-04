@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
 import type { 
-  Player, Team, Coach, Game, Trade, Training, Season, Draft,
-  InsertPlayer, InsertTeam, InsertCoach, InsertGame, InsertTrade, InsertTraining, InsertSeason, InsertDraft
+  Player, Team, Coach, Game, Trade, Training, Season, Draft, ContractOffer,
+  InsertPlayer, InsertTeam, InsertCoach, InsertGame, InsertTrade, InsertTraining, InsertSeason, InsertDraft, InsertContractOffer
 } from "@shared/schema";
 
 export interface IStorage {
@@ -69,6 +69,16 @@ export interface IStorage {
   updateDraft(id: string, draft: Partial<Draft>): Promise<Draft | null>;
   deleteDraft(id: string): Promise<boolean>;
   getDraftBySeason(season: string): Promise<Draft | null>;
+  
+  // Contract Offers
+  getContractOffers(): Promise<ContractOffer[]>;
+  getContractOffer(id: string): Promise<ContractOffer | null>;
+  createContractOffer(offer: InsertContractOffer): Promise<ContractOffer>;
+  updateContractOffer(id: string, offer: Partial<ContractOffer>): Promise<ContractOffer | null>;
+  deleteContractOffer(id: string): Promise<boolean>;
+  getContractOffersByPlayer(playerId: string): Promise<ContractOffer[]>;
+  getContractOffersByTeam(teamId: string): Promise<ContractOffer[]>;
+  getActiveContractOffers(): Promise<ContractOffer[]>;
 }
 
 class MemStorage implements IStorage {
@@ -80,6 +90,7 @@ class MemStorage implements IStorage {
   private trainings: Map<string, Training> = new Map();
   private seasons: Map<string, Season> = new Map();
   private drafts: Map<string, Draft> = new Map();
+  private contractOffers: Map<string, ContractOffer> = new Map();
 
   constructor() {
     this.initializeMockData();
@@ -1052,6 +1063,59 @@ class MemStorage implements IStorage {
   async getDraftBySeason(season: string): Promise<Draft | null> {
     const draft = Array.from(this.drafts.values()).find(d => d.season === season);
     return draft || null;
+  }
+
+  // Contract Offers
+  async getContractOffers(): Promise<ContractOffer[]> {
+    return Array.from(this.contractOffers.values());
+  }
+
+  async getContractOffer(id: string): Promise<ContractOffer | null> {
+    return this.contractOffers.get(id) || null;
+  }
+
+  async createContractOffer(offer: InsertContractOffer): Promise<ContractOffer> {
+    const newOffer: ContractOffer = {
+      ...offer,
+      id: nanoid(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.contractOffers.set(newOffer.id, newOffer);
+    return newOffer;
+  }
+
+  async updateContractOffer(id: string, offer: Partial<ContractOffer>): Promise<ContractOffer | null> {
+    const existing = this.contractOffers.get(id);
+    if (!existing) return null;
+
+    const updated: ContractOffer = {
+      ...existing,
+      ...offer,
+      id: existing.id,
+      updatedAt: new Date(),
+    };
+    this.contractOffers.set(id, updated);
+    return updated;
+  }
+
+  async deleteContractOffer(id: string): Promise<boolean> {
+    return this.contractOffers.delete(id);
+  }
+
+  async getContractOffersByPlayer(playerId: string): Promise<ContractOffer[]> {
+    return Array.from(this.contractOffers.values()).filter(offer => offer.playerId === playerId);
+  }
+
+  async getContractOffersByTeam(teamId: string): Promise<ContractOffer[]> {
+    return Array.from(this.contractOffers.values()).filter(offer => offer.teamId === teamId);
+  }
+
+  async getActiveContractOffers(): Promise<ContractOffer[]> {
+    const now = new Date();
+    return Array.from(this.contractOffers.values()).filter(offer => 
+      offer.status === "pending" && offer.offerExpiresAt > now
+    );
   }
 }
 

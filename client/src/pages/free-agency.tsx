@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,11 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { PlayerCard } from "@/components/player-card";
-import { Search, Handshake, DollarSign, Users, Clock } from "lucide-react";
-import type { Player, Team } from "@shared/schema";
+import { Search, Handshake, DollarSign, Users, Clock, AlertTriangle, CheckCircle } from "lucide-react";
+import type { Player, Team, ContractOffer } from "@shared/schema";
 
 export function FreeAgency() {
   const { toast } = useToast();
@@ -21,66 +23,142 @@ export function FreeAgency() {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [offerAmount, setOfferAmount] = useState("");
   const [contractYears, setContractYears] = useState("1");
+  const [contractType, setContractType] = useState("veteran");
+  const [signingBonus, setSigningBonus] = useState("");
+  const [teamOption, setTeamOption] = useState(false);
+  const [playerOption, setPlayerOption] = useState(false);
+  const [noTradeClause, setNoTradeClause] = useState(false);
+
+  // Manual data states for fast loading
+  const [manualTeams, setManualTeams] = useState<Team[]>([]);
+  const [manualPlayers, setManualPlayers] = useState<Player[]>([]);
 
   const { data: teams } = useQuery({
     queryKey: ["/api/teams"],
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
   const { data: freeAgents, isLoading } = useQuery({
     queryKey: ["/api/players/free-agents"],
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
-  const { data: coaches } = useQuery({
-    queryKey: ["/api/coaches/free-agents"],
+  const { data: contractOffers } = useQuery({
+    queryKey: ["/api/contract-offers/active"],
+    staleTime: 1000 * 60 * 2,
+    refetchOnWindowFocus: false,
   });
 
-  const userTeam = teams?.[0] as Team;
+  // Immediate data fetching
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const teamsRes = await fetch('/api/teams');
+        const teamsData = await teamsRes.json();
+        setManualTeams(teamsData);
 
-  const signPlayerMutation = useMutation({
-    mutationFn: async ({ playerId, salary, years }: { playerId: string; salary: number; years: number }) => {
-      return apiRequest(`/api/players/${playerId}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          teamId: userTeam.id,
-          salary,
-          contractYears: years,
-        }),
-      });
+        const playersRes = await fetch('/api/players');
+        const playersData = await playersRes.json();
+        setManualPlayers(playersData);
+      } catch (err) {
+        console.error('Manual data fetch failed:', err);
+      }
+    };
+    
+    fetchData();
+  }, []);
+
+  // Combined data
+  const teamsData = teams || manualTeams;
+  const playersData = freeAgents || manualPlayers?.filter(p => p.teamId === null);
+  
+  const userTeam = teamsData?.[0] as Team;
+
+  const createOfferMutation = useMutation({
+    mutationFn: async (offerData: any) => {
+      return apiRequest("POST", "/api/contract-offers", offerData);
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast({
-        title: "Player Signed",
-        description: `${data.name} has been signed to your team!`,
+        title: "Contract Offer Sent",
+        description: `Contract offer sent to ${selectedPlayer?.name}!`,
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/players"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/contract-offers"] });
       setSelectedPlayer(null);
-      setOfferAmount("");
-      setContractYears("1");
+      resetOfferForm();
     },
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to sign player. Check salary cap space.",
+        description: "Failed to send contract offer.",
         variant: "destructive",
       });
     },
   });
 
-  const handleSignPlayer = () => {
-    if (!selectedPlayer || !offerAmount) return;
-
-    const salary = parseFloat(offerAmount) * 1000000; // Convert to actual salary
-    const years = parseInt(contractYears);
-
-    signPlayerMutation.mutate({
-      playerId: selectedPlayer.id,
-      salary,
-      years,
-    });
+  const resetOfferForm = () => {
+    setOfferAmount("");
+    setContractYears("1");
+    setContractType("veteran");
+    setSigningBonus("");
+    setTeamOption(false);
+    setPlayerOption(false);
+    setNoTradeClause(false);
   };
 
-  const filteredPlayers = freeAgents?.filter((player: Player) => {
+  const calculateSalaryCap = () => {
+    if (!userTeam) return { remaining: 0, percentage: 0 };
+    const remaining = userTeam.salaryCap - userTeam.currentSalary;
+    const percentage = (userTeam.currentSalary / userTeam.salaryCap) * 100;
+    return { remaining, percentage };
+  };
+
+  const validateOffer = () => {
+    if (!selectedPlayer || !offerAmount || !userTeam) return false;
+    
+    const annualSalary = parseFloat(offerAmount) * 1000000;
+    const { remaining } = calculateSalaryCap();
+    
+    return annualSalary <= remaining;
+  };
+
+  const handleSendOffer = () => {
+    if (!selectedPlayer || !offerAmount || !userTeam) return;
+
+    const annualSalary = parseFloat(offerAmount) * 1000000;
+    const years = parseInt(contractYears);
+    const bonus = parseFloat(signingBonus) * 1000000 || 0;
+    const totalValue = (annualSalary * years) + bonus;
+
+    if (!validateOffer()) {
+      toast({
+        title: "Salary Cap Exceeded",
+        description: "This offer would exceed your salary cap space.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const offerData = {
+      playerId: selectedPlayer.id,
+      teamId: userTeam.id,
+      contractType,
+      yearsOffered: years,
+      totalValue,
+      annualSalary,
+      signingBonus: bonus,
+      teamOption,
+      playerOption,
+      noTradeClause,
+      offerExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    };
+
+    createOfferMutation.mutate(offerData);
+  };
+
+  const filteredPlayers = playersData?.filter((player: Player) => {
     const matchesSearch = player.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPosition = positionFilter === "all" || player.position === positionFilter;
     return matchesSearch && matchesPosition;
@@ -124,7 +202,7 @@ export function FreeAgency() {
           <div>
             <h1 className="text-2xl font-bold text-foreground">Free Agency</h1>
             <p className="text-muted-foreground">
-              {freeAgents?.length || 0} available players • {formatSalary(getSalaryCapSpace())} cap space
+              {playersData?.length || 0} available players • {formatSalary(getSalaryCapSpace())} cap space
             </p>
           </div>
           <div className="flex items-center space-x-4">
@@ -236,19 +314,77 @@ export function FreeAgency() {
                                 onClick={() => setSelectedPlayer(player)}
                               >
                                 <Handshake className="w-4 h-4 mr-2" />
-                                Sign
+                                Negotiate
                               </Button>
                             </DialogTrigger>
-                            <DialogContent>
+                            <DialogContent className="max-w-2xl">
                               <DialogHeader>
-                                <DialogTitle>Sign {player.name}</DialogTitle>
+                                <DialogTitle>Contract Negotiation - {player.name}</DialogTitle>
                               </DialogHeader>
-                              <div className="space-y-4">
+                              <div className="space-y-6">
+                                {/* Player Info */}
+                                <div className="p-4 bg-muted rounded-lg">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center space-x-3">
+                                      <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
+                                        <span className="text-sm font-bold">{player.jerseyNumber}</span>
+                                      </div>
+                                      <div>
+                                        <div className="font-semibold">{player.name}</div>
+                                        <div className="text-sm text-muted-foreground">
+                                          {player.position} • {player.age}yrs • OVR {player.overall}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className="text-sm text-muted-foreground">Market Value</div>
+                                      <div className="font-semibold">${getEstimatedValue(player)}M/yr</div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Salary Cap Info */}
+                                <div className="p-4 bg-muted rounded-lg">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center space-x-2">
+                                      <DollarSign className="w-4 h-4 text-green-500" />
+                                      <span className="font-medium">Salary Cap Status</span>
+                                    </div>
+                                    <span className={`text-sm font-medium ${validateOffer() ? 'text-green-500' : 'text-red-500'}`}>
+                                      {validateOffer() ? 
+                                        <div className="flex items-center space-x-1">
+                                          <CheckCircle className="w-4 h-4" />
+                                          <span>Valid Offer</span>
+                                        </div> : 
+                                        <div className="flex items-center space-x-1">
+                                          <AlertTriangle className="w-4 h-4" />
+                                          <span>Exceeds Cap</span>
+                                        </div>
+                                      }
+                                    </span>
+                                  </div>
+                                  <div className="space-y-1">
+                                    <div className="flex justify-between text-sm">
+                                      <span>Available Cap Space:</span>
+                                      <span className="font-semibold">{formatSalary(getSalaryCapSpace())}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                      <span>Cap Space After Signing:</span>
+                                      <span className={`font-semibold ${
+                                        getSalaryCapSpace() - ((parseFloat(offerAmount) || 0) * 1000000) >= 0 
+                                          ? 'text-green-500' 
+                                          : 'text-red-500'
+                                      }`}>
+                                        {formatSalary(getSalaryCapSpace() - ((parseFloat(offerAmount) || 0) * 1000000))}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Contract Terms */}
                                 <div className="grid grid-cols-2 gap-4">
                                   <div>
-                                    <label className="text-sm font-medium text-foreground">
-                                      Annual Salary (millions)
-                                    </label>
+                                    <Label className="text-sm font-medium">Annual Salary (millions)</Label>
                                     <Input
                                       type="number"
                                       placeholder="e.g., 5.5"
@@ -258,9 +394,7 @@ export function FreeAgency() {
                                     />
                                   </div>
                                   <div>
-                                    <label className="text-sm font-medium text-foreground">
-                                      Contract Years
-                                    </label>
+                                    <Label className="text-sm font-medium">Contract Years</Label>
                                     <Select value={contractYears} onValueChange={setContractYears}>
                                       <SelectTrigger className="mt-1">
                                         <SelectValue />
@@ -275,36 +409,115 @@ export function FreeAgency() {
                                     </Select>
                                   </div>
                                 </div>
-                                <div className="p-3 bg-muted rounded-lg">
-                                  <div className="text-sm text-muted-foreground mb-2">Contract Details</div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label className="text-sm font-medium">Contract Type</Label>
+                                    <Select value={contractType} onValueChange={setContractType}>
+                                      <SelectTrigger className="mt-1">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="rookie">Rookie</SelectItem>
+                                        <SelectItem value="veteran">Veteran</SelectItem>
+                                        <SelectItem value="max">Max Contract</SelectItem>
+                                        <SelectItem value="minimum">Minimum</SelectItem>
+                                        <SelectItem value="extension">Extension</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div>
+                                    <Label className="text-sm font-medium">Signing Bonus (millions)</Label>
+                                    <Input
+                                      type="number"
+                                      placeholder="e.g., 2.0"
+                                      value={signingBonus}
+                                      onChange={(e) => setSigningBonus(e.target.value)}
+                                      className="mt-1"
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* Contract Options */}
+                                <div className="space-y-3">
+                                  <Label className="text-sm font-medium">Contract Options</Label>
+                                  <div className="space-y-2">
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox 
+                                        id="team-option"
+                                        checked={teamOption}
+                                        onCheckedChange={(checked) => setTeamOption(checked === true)}
+                                      />
+                                      <Label htmlFor="team-option" className="text-sm">
+                                        Team Option (Final Year)
+                                      </Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox 
+                                        id="player-option"
+                                        checked={playerOption}
+                                        onCheckedChange={(checked) => setPlayerOption(checked === true)}
+                                      />
+                                      <Label htmlFor="player-option" className="text-sm">
+                                        Player Option (Final Year)
+                                      </Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox 
+                                        id="no-trade"
+                                        checked={noTradeClause}
+                                        onCheckedChange={(checked) => setNoTradeClause(checked === true)}
+                                      />
+                                      <Label htmlFor="no-trade" className="text-sm">
+                                        No-Trade Clause
+                                      </Label>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Contract Summary */}
+                                <div className="p-4 bg-muted rounded-lg">
+                                  <div className="text-sm text-muted-foreground mb-2">Contract Summary</div>
                                   <div className="space-y-1">
                                     <div className="flex justify-between">
                                       <span>Annual Salary:</span>
+                                      <span className="font-semibold">${offerAmount || "0"}M</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Signing Bonus:</span>
+                                      <span className="font-semibold">${signingBonus || "0"}M</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Total Contract Value:</span>
                                       <span className="font-semibold">
-                                        ${offerAmount || "0"}M
+                                        ${(((parseFloat(offerAmount) || 0) * parseInt(contractYears)) + (parseFloat(signingBonus) || 0)).toFixed(1)}M
                                       </span>
                                     </div>
                                     <div className="flex justify-between">
-                                      <span>Total Value:</span>
+                                      <span>Average Annual Value:</span>
                                       <span className="font-semibold">
-                                        ${((parseFloat(offerAmount) || 0) * parseInt(contractYears)).toFixed(1)}M
-                                      </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span>Cap Space After:</span>
-                                      <span className="font-semibold">
-                                        {formatSalary(getSalaryCapSpace() - ((parseFloat(offerAmount) || 0) * 1000000))}
+                                        ${(((parseFloat(offerAmount) || 0) * parseInt(contractYears)) / parseInt(contractYears)).toFixed(1)}M
                                       </span>
                                     </div>
                                   </div>
                                 </div>
-                                <Button 
-                                  onClick={handleSignPlayer}
-                                  disabled={signPlayerMutation.isPending || !offerAmount}
-                                  className="w-full"
-                                >
-                                  {signPlayerMutation.isPending ? "Signing..." : "Sign Player"}
-                                </Button>
+
+                                <div className="flex space-x-2">
+                                  <Button 
+                                    onClick={handleSendOffer}
+                                    disabled={createOfferMutation.isPending || !offerAmount || !validateOffer()}
+                                    className="flex-1"
+                                  >
+                                    {createOfferMutation.isPending ? "Sending..." : "Send Offer"}
+                                  </Button>
+                                  <Button 
+                                    variant="outline"
+                                    onClick={() => setSelectedPlayer(null)}
+                                    className="flex-1"
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
                               </div>
                             </DialogContent>
                           </Dialog>
@@ -318,39 +531,48 @@ export function FreeAgency() {
           </CardContent>
         </Card>
 
-        {/* Free Agent Coaches */}
-        {coaches && coaches.length > 0 && (
+        {/* Active Contract Offers */}
+        {contractOffers && contractOffers.length > 0 && (
           <Card className="bg-card border-border mt-8">
             <CardHeader>
-              <CardTitle className="text-foreground">Available Coaches</CardTitle>
+              <CardTitle className="text-foreground flex items-center space-x-2">
+                <Clock className="w-5 h-5" />
+                <span>Active Contract Offers</span>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {coaches.map((coach: any) => (
-                  <div key={coach.id} className="p-4 bg-muted rounded-lg">
+                {contractOffers.map((offer: ContractOffer) => (
+                  <div key={offer.id} className="p-4 bg-muted rounded-lg">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <div className="w-12 h-12 bg-muted-foreground/20 rounded-full flex items-center justify-center">
-                          <Users className="w-6 h-6 text-foreground" />
+                          <Handshake className="w-6 h-6 text-foreground" />
                         </div>
                         <div>
-                          <div className="text-foreground font-semibold">{coach.name}</div>
+                          <div className="text-foreground font-semibold">
+                            {playersData?.find((p: Player) => p.id === offer.playerId)?.name || 'Unknown Player'}
+                          </div>
                           <div className="text-sm text-muted-foreground">
-                            {coach.age}yrs • {coach.experience} years exp • OVR {coach.overallRating}
+                            ${(offer.annualSalary / 1000000).toFixed(1)}M/yr • {offer.yearsOffered} years
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-4">
                         <div className="text-right">
-                          <div className="text-sm text-muted-foreground">Salary</div>
+                          <div className="text-sm text-muted-foreground">Status</div>
                           <div className="text-foreground font-semibold">
-                            ${(coach.salary / 1000000).toFixed(1)}M/yr
+                            <Badge variant={offer.status === 'pending' ? 'secondary' : 'default'}>
+                              {offer.status.charAt(0).toUpperCase() + offer.status.slice(1)}
+                            </Badge>
                           </div>
                         </div>
-                        <Button size="sm" variant="outline">
-                          <Handshake className="w-4 h-4 mr-2" />
-                          Hire
-                        </Button>
+                        <div className="text-right">
+                          <div className="text-sm text-muted-foreground">Total Value</div>
+                          <div className="text-foreground font-semibold">
+                            ${(offer.totalValue / 1000000).toFixed(1)}M
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
