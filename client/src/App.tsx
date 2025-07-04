@@ -11,6 +11,7 @@ import { Draft } from "@/pages/draft";
 import { Trades } from "@/pages/trades";
 import { Coaching } from "@/pages/coaching";
 import { CoachingLineup } from "@/pages/coaching-lineup";
+import { CoachingLineupTest } from "@/pages/coaching-lineup-test";
 import { CoachingTraining } from "@/pages/coaching-training";
 import { Scouting } from "@/pages/scouting";
 import { FreeAgency } from "@/pages/free-agency";
@@ -67,7 +68,7 @@ function App() {
           <Route path="/coaching/lineup">
             {() => (
               <div className="h-screen overflow-hidden bg-background">
-                <CoachingLineup />
+                <CoachingLineupTest />
               </div>
             )}
           </Route>
