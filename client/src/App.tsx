@@ -2,6 +2,7 @@ import { Router, Route } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { MainMenu } from "@/pages/main-menu";
+import { TeamSelection } from "@/pages/team-selection";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Dashboard } from "@/pages/dashboard";
 import { Roster } from "@/pages/roster";
@@ -22,6 +23,9 @@ function App() {
         <Router>
           {/* Main Menu - Full Screen */}
           <Route path="/" component={MainMenu} />
+          
+          {/* Team Selection - Full Screen */}
+          <Route path="/team-selection" component={TeamSelection} />
           
           {/* Game Pages - With Sidebar Layout */}
           <Route path="/dashboard">
