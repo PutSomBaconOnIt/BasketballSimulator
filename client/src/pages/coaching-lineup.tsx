@@ -163,14 +163,6 @@ export function CoachingLineup() {
                         className="w-16 px-2 py-1 text-sm bg-background border border-border rounded focus:ring-2 focus:ring-primary"
                       />
                       <span className="text-xs text-muted-foreground">min</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handlePlayerSwap(player)}
-                        className="w-8 h-8 p-0 ml-2 hover:bg-primary/20 rounded-full"
-                      >
-                        <X className="w-4 h-4 text-muted-foreground hover:text-primary transform rotate-45" />
-                      </Button>
                     </div>
                   </div>
                 ))}
