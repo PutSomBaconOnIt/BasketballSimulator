@@ -26,7 +26,9 @@ export function PlayerDatabase() {
   const filteredPlayers = players?.filter((player: Player) => {
     const matchesSearch = player.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPosition = positionFilter === "all" || player.position === positionFilter;
-    const matchesTeam = teamFilter === "all" || player.teamId === teamFilter;
+    const matchesTeam = teamFilter === "all" || 
+                       (teamFilter === "free-agents" && player.teamId === null) ||
+                       player.teamId === teamFilter;
     
     return matchesSearch && matchesPosition && matchesTeam;
   });
@@ -103,7 +105,7 @@ export function PlayerDatabase() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Teams</SelectItem>
-                  <SelectItem value="">Free Agents</SelectItem>
+                  <SelectItem value="free-agents">Free Agents</SelectItem>
                   {teams?.map((team: Team) => (
                     <SelectItem key={team.id} value={team.id}>
                       {team.city} {team.name}
