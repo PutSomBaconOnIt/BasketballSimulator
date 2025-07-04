@@ -66,22 +66,16 @@ function App() {
           
           <Route path="/coaching/lineup">
             {() => (
-              <div className="flex h-screen overflow-hidden bg-background">
-                <Sidebar />
-                <main className="flex-1 overflow-y-auto">
-                  <CoachingLineup />
-                </main>
+              <div className="h-screen overflow-hidden bg-background">
+                <CoachingLineup />
               </div>
             )}
           </Route>
           
           <Route path="/coaching/training">
             {() => (
-              <div className="flex h-screen overflow-hidden bg-background">
-                <Sidebar />
-                <main className="flex-1 overflow-y-auto">
-                  <CoachingTraining />
-                </main>
+              <div className="h-screen overflow-hidden bg-background">
+                <CoachingTraining />
               </div>
             )}
           </Route>
