@@ -107,6 +107,13 @@ Changelog:
   - Added Player Ratings slide with 8 skill categories and progress bars
   - Modal features custom overlay with dark backdrop and keyboard support
   - Navigation arrows positioned on sides for easy slide switching
+- July 04, 2025. Coaching section restructured with dedicated pages:
+  - Restructured coaching from tabbed interface to dedicated page navigation
+  - Main coaching page shows head coach info and quick action buttons
+  - Created separate /coaching/lineup page for managing player minutes
+  - Created separate /coaching/training page for training programs
+  - Added navigation links and back buttons for seamless page transitions
+  - Each coaching sub-section now has its own dedicated page structure
 ```
 
 ## User Preferences

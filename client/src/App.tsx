@@ -10,6 +10,8 @@ import { PlayerDatabase } from "@/pages/player-database";
 import { Draft } from "@/pages/draft";
 import { Trades } from "@/pages/trades";
 import { Coaching } from "@/pages/coaching";
+import { CoachingLineup } from "@/pages/coaching-lineup";
+import { CoachingTraining } from "@/pages/coaching-training";
 import { Scouting } from "@/pages/scouting";
 import { FreeAgency } from "@/pages/free-agency";
 import { Statistics } from "@/pages/statistics";
@@ -57,6 +59,28 @@ function App() {
                 <Sidebar />
                 <main className="flex-1 overflow-y-auto">
                   <Coaching />
+                </main>
+              </div>
+            )}
+          </Route>
+          
+          <Route path="/coaching/lineup">
+            {() => (
+              <div className="flex h-screen overflow-hidden bg-background">
+                <Sidebar />
+                <main className="flex-1 overflow-y-auto">
+                  <CoachingLineup />
+                </main>
+              </div>
+            )}
+          </Route>
+          
+          <Route path="/coaching/training">
+            {() => (
+              <div className="flex h-screen overflow-hidden bg-background">
+                <Sidebar />
+                <main className="flex-1 overflow-y-auto">
+                  <CoachingTraining />
                 </main>
               </div>
             )}
