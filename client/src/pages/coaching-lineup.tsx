@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,19 +10,43 @@ export function CoachingLineup() {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [startersList, setStartersList] = useState<Player[]>([]);
   const [benchList, setBenchList] = useState<Player[]>([]);
+  const [manualPlayers, setManualPlayers] = useState<Player[]>([]);
   
   const { data: players } = useQuery({
     queryKey: ["/api/players"],
   });
 
-  // Initialize lineups when players data is available
-  const lakersPlayers = players?.filter((p: Player) => p.teamId) || [];
+  // Immediate data fetching on mount like other pages
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      try {
+        const playersRes = await fetch('/api/players');
+        const playersData = await playersRes.json();
+        setManualPlayers(playersData);
+        console.log("Lineup - Manual fetch players:", playersData);
+      } catch (error) {
+        console.error("Error fetching players:", error);
+      }
+    };
+
+    fetchPlayers();
+  }, []);
+
+  // Use manual players as fallback
+  const playersData = players || manualPlayers;
+  const lakersPlayers = playersData?.filter((p: Player) => p.teamId) || [];
   
-  // Only set initial lineup if not already set
-  if (lakersPlayers.length > 0 && startersList.length === 0) {
-    setStartersList(lakersPlayers.slice(0, 5));
-    setBenchList(lakersPlayers.slice(5));
-  }
+  // Initialize lineups when players data is available
+  useEffect(() => {
+    if (lakersPlayers.length > 0 && startersList.length === 0) {
+      setStartersList(lakersPlayers.slice(0, 5));
+      setBenchList(lakersPlayers.slice(5));
+      console.log("Lineup - Initialized:", {
+        starters: lakersPlayers.slice(0, 5),
+        bench: lakersPlayers.slice(5)
+      });
+    }
+  }, [lakersPlayers.length]);
   
   // Define starting lineup with realistic minutes (32-38 minutes)
   const starterMinutes = [36, 34, 32, 35, 33]; // Realistic starter minutes
