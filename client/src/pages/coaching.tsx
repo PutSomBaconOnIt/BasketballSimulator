@@ -92,7 +92,7 @@ export function Coaching() {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm text-muted-foreground">Offensive Rating</label>
                       <div className="flex items-center space-x-2">
@@ -106,6 +106,14 @@ export function Coaching() {
                       <div className="flex items-center space-x-2">
                         <Progress value={headCoach.defenseRating} className="flex-1" />
                         <span className="text-sm font-medium">{headCoach.defenseRating}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm text-muted-foreground">Development Rating</label>
+                      <div className="flex items-center space-x-2">
+                        <Progress value={headCoach.developmentRating} className="flex-1" />
+                        <span className="text-sm font-medium">{headCoach.developmentRating}</span>
                       </div>
                     </div>
                   </div>
