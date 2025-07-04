@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Target, Clock, ArrowLeft, X } from "lucide-react";
+import { Target, Clock, ArrowLeft, ArrowUp } from "lucide-react";
 import { Link } from "wouter";
 import type { Player } from "@shared/schema";
 
@@ -127,7 +127,7 @@ export function CoachingLineup() {
           <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-lg">
             <p className="text-sm text-foreground">
               <span className="font-medium">{selectedPlayer.name}</span> is selected. 
-              Click the <X className="inline w-3 h-3 mx-1 transform rotate-45" /> button next to another player to swap positions.
+              Click on any bench player to promote them to the starting lineup.
             </p>
           </div>
         )}
@@ -179,6 +179,9 @@ export function CoachingLineup() {
                 <Clock className="w-5 h-5 mr-2 text-blue-500" />
                 Bench Players
               </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Click on any bench player to promote them to the starting lineup
+              </p>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -192,9 +195,13 @@ export function CoachingLineup() {
                   </div>
                 ) : (
                   benchList.map((player: Player, index: number) => (
-                  <div key={player.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
-                    selectedPlayer?.id === player.id ? 'bg-primary/20 border-2 border-primary' : 'bg-muted hover:bg-muted/70'
-                  }`}>
+                  <div 
+                    key={player.id} 
+                    className={`flex items-center justify-between p-3 rounded-lg transition-colors cursor-pointer ${
+                      selectedPlayer?.id === player.id ? 'bg-primary/20 border-2 border-primary' : 'bg-muted hover:bg-muted/70'
+                    }`}
+                    onClick={() => handlePlayerSwap(player)}
+                  >
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 bg-secondary/20 rounded-full flex items-center justify-center">
                         <span className="text-secondary font-semibold text-sm">{player.jerseyNumber}</span>
@@ -211,16 +218,12 @@ export function CoachingLineup() {
                         min="0" 
                         max="48" 
                         className="w-16 px-2 py-1 text-sm bg-background border border-border rounded focus:ring-2 focus:ring-primary"
+                        onClick={(e) => e.stopPropagation()}
                       />
                       <span className="text-xs text-muted-foreground">min</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handlePlayerSwap(player)}
-                        className="w-8 h-8 p-0 ml-2 hover:bg-primary/20 rounded-full"
-                      >
-                        <X className="w-4 h-4 text-muted-foreground hover:text-primary transform rotate-45" />
-                      </Button>
+                      <div className="w-8 h-8 flex items-center justify-center">
+                        <ArrowUp className="w-4 h-4 text-muted-foreground" />
+                      </div>
                     </div>
                   </div>
                   ))
