@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Users, Bus, Dumbbell, Activity, Calendar } from "lucide-react";
-import type { Team, Player, Coach, Training } from "@shared/schema";
+import { Plus, Users, Bus, Calendar } from "lucide-react";
+import type { Team, Player, Coach } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -23,7 +23,7 @@ export function Roster() {
   // Manual data states
   const [manualTeams, setManualTeams] = useState<Team[]>([]);
   const [manualCoaches, setManualCoaches] = useState<Coach[]>([]);
-  const [manualTrainings, setManualTrainings] = useState<Training[]>([]);
+
   const [manualPlayers, setManualPlayers] = useState<Player[]>([]);
 
   // Player detail modal state
@@ -61,7 +61,6 @@ export function Roster() {
   // Combined data using manual fallback
   const teamsData = teams || manualTeams;
   const coachesData = coaches || manualCoaches;
-  const trainingsData = trainings || manualTrainings;
 
   // Get user's team based on URL parameter, default to first team
   const userTeam = teamFromUrl 
@@ -82,10 +81,7 @@ export function Roster() {
         const coachesData = await coachesRes.json();
         setManualCoaches(coachesData);
 
-        // Fetch trainings
-        const trainingsRes = await fetch('/api/training');
-        const trainingsData = await trainingsRes.json();
-        setManualTrainings(trainingsData);
+
 
         // Fetch all players
         const playersRes = await fetch('/api/players');
@@ -168,37 +164,7 @@ export function Roster() {
     .sort((a: Player, b: Player) => b.overall - a.overall)
     .slice(5) || [];
 
-  // Get active training sessions
-  const activeTrainings = trainingsData?.filter((t: Training) => 
-    !t.completed && teamPlayers?.some((p: Player) => p.id === t.playerId)
-  ) || [];
 
-  const getTrainingTypeIcon = (type: string) => {
-    switch (type) {
-      case "strength":
-        return <Dumbbell className="w-4 h-4 text-primary" />;
-      case "shooting":
-        return <Activity className="w-4 h-4 text-blue-500" />;
-      default:
-        return <Dumbbell className="w-4 h-4 text-primary" />;
-    }
-  };
-
-  const getTrainingImprovement = (type: string) => {
-    switch (type) {
-      case "strength":
-        return "+2 STR";
-      case "shooting":
-        return "+1 3PT";
-      default:
-        return "+1 STAT";
-    }
-  };
-
-  const getDaysRemaining = (endDate: string) => {
-    const days = Math.ceil((new Date(endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-    return Math.max(0, days);
-  };
 
   return (
     <div className="flex-1 flex flex-col">
@@ -341,45 +307,7 @@ export function Roster() {
               </CardContent>
             </Card>
 
-            {/* Training Schedule */}
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="text-foreground">Training Schedule</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {activeTrainings.map((training: Training) => {
-                    const player = players?.find((p: Player) => p.id === training.playerId);
-                    const daysRemaining = getDaysRemaining(training.endDate);
-                    
-                    return (
-                      <div key={training.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                            {getTrainingTypeIcon(training.type)}
-                          </div>
-                          <div>
-                            <div className="text-foreground text-sm font-medium">
-                              {training.type.charAt(0).toUpperCase() + training.type.slice(1)} Training
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {daysRemaining} {daysRemaining === 1 ? "day" : "days"} remaining
-                            </div>
-                          </div>
-                        </div>
-                        <Badge variant="outline" className="text-green-400">
-                          {getTrainingImprovement(training.type)}
-                        </Badge>
-                      </div>
-                    );
-                  })}
-                </div>
-                <Button variant="outline" className="w-full mt-4">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Schedule Training
-                </Button>
-              </CardContent>
-            </Card>
+
 
             {/* Recent Activity */}
             <Card className="bg-card border-border">
