@@ -38,18 +38,33 @@ export function CoachingLineup() {
       console.log("Lineup - Lakers players:", lakersPlayers);
       
       if (lakersPlayers.length > 0) {
-        // Sort by position priority for starting lineup
-        const positionOrder = { PG: 1, SG: 2, SF: 3, PF: 4, C: 5 };
-        const sortedPlayers = lakersPlayers.sort((a: Player, b: Player) => {
-          const aPos = positionOrder[a.position as keyof typeof positionOrder] || 6;
-          const bPos = positionOrder[b.position as keyof typeof positionOrder] || 6;
-          if (aPos !== bPos) return aPos - bPos;
-          return b.overall - a.overall; // Higher overall rating first
+        // Create starting lineup by finding best player for each position
+        const positions = ['PG', 'SG', 'SF', 'PF', 'C'];
+        const starters: Player[] = [];
+        const remainingPlayers = [...lakersPlayers];
+
+        // For each position, find the best available player
+        positions.forEach(position => {
+          const positionPlayers = remainingPlayers.filter(p => p.position === position);
+          if (positionPlayers.length > 0) {
+            // Get the highest rated player for this position
+            const bestPlayer = positionPlayers.sort((a, b) => b.overall - a.overall)[0];
+            starters.push(bestPlayer);
+            // Remove from remaining players
+            const index = remainingPlayers.findIndex(p => p.id === bestPlayer.id);
+            if (index > -1) remainingPlayers.splice(index, 1);
+          }
         });
 
-        // Set starters (top 5 players by position)
-        const starters = sortedPlayers.slice(0, 5);
-        const bench = sortedPlayers.slice(5);
+        // If we don't have 5 starters, fill with best remaining players
+        while (starters.length < 5 && remainingPlayers.length > 0) {
+          const bestRemaining = remainingPlayers.sort((a, b) => b.overall - a.overall)[0];
+          starters.push(bestRemaining);
+          const index = remainingPlayers.findIndex(p => p.id === bestRemaining.id);
+          if (index > -1) remainingPlayers.splice(index, 1);
+        }
+
+        const bench = remainingPlayers;
 
         console.log("Lineup - Starters:", starters);
         console.log("Lineup - Bench:", bench);
@@ -217,55 +232,60 @@ export function CoachingLineup() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {startersList.map((player, index) => (
-              <div key={player.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                  <span className="font-bold text-primary">{player.position}</span>
+            {startersList.map((player, index) => {
+              const positions = ['PG', 'SG', 'SF', 'PF', 'C'];
+              const expectedPosition = positions[index] || player.position;
+              
+              return (
+                <div key={player.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                    <span className="font-bold text-primary">{expectedPosition}</span>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{player.name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {player.position} • Overall: {player.overall}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => adjustMinutes(index, true, -1)}
+                      className="w-7 h-7 p-0"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </Button>
+                    <span className="w-8 text-center font-medium">{starterMinutes[index]}</span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => adjustMinutes(index, true, 1)}
+                      className="w-7 h-7 p-0"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handlePlayerSwap(player)}
+                      className={selectedPlayer?.id === player.id ? "bg-blue-100 border-blue-300" : ""}
+                    >
+                      Move
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleViewPlayerCard(player)}
+                    >
+                      <Info className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold">{player.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {player.position} • Overall: {player.overall}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => adjustMinutes(index, true, -1)}
-                    className="w-7 h-7 p-0"
-                  >
-                    <Minus className="w-3 h-3" />
-                  </Button>
-                  <span className="w-8 text-center font-medium">{starterMinutes[index]}</span>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => adjustMinutes(index, true, 1)}
-                    className="w-7 h-7 p-0"
-                  >
-                    <Plus className="w-3 h-3" />
-                  </Button>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handlePlayerSwap(player)}
-                    className={selectedPlayer?.id === player.id ? "bg-blue-100 border-blue-300" : ""}
-                  >
-                    Move
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleViewPlayerCard(player)}
-                  >
-                    <Info className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>
