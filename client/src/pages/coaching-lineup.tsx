@@ -326,7 +326,7 @@ export function CoachingLineup() {
         {swapMode && !selectedPlayer && (
           <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
             <p className="text-sm text-foreground">
-              <span className="font-medium">Swap Mode Active:</span> Click any player to select them for swapping.
+              <span className="font-medium">Move Mode Active:</span> Click any player to select them for moving.
             </p>
           </div>
         )}
@@ -359,10 +359,10 @@ export function CoachingLineup() {
                     ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
                     : 'hover:bg-primary/10 border-primary/20'
                   }`}
-                  title="Click to enable/disable swap mode"
+                  title="Click to enable/disable move mode"
                 >
                   <ArrowUp className="w-3 h-3 mr-1" />
-                  {swapMode ? 'Exit Swap Mode' : 'Swap with Bench'}
+                  {swapMode ? 'Exit Move Mode' : 'Move Players'}
                 </Button>
               </CardTitle>
             </CardHeader>
@@ -370,7 +370,7 @@ export function CoachingLineup() {
               {!swapMode && (
                 <div className="mb-4 p-3 bg-muted/30 rounded-lg border border-muted">
                   <p className="text-xs text-muted-foreground">
-                    💡 To change your starting lineup: Click "Swap with Bench" to enable swap mode, then select players to swap positions.
+                    💡 To change your starting lineup: Click "Move Players" to enable move mode, then select players to swap positions.
                   </p>
                 </div>
               )}
