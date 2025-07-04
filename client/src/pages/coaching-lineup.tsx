@@ -393,7 +393,7 @@ export function CoachingLineup() {
                         <Info className="w-3 h-3 text-muted-foreground hover:text-primary" />
                       </Button>
                       <div className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-primary font-semibold text-xs">{player.jerseyNumber}</span>
+                        <span className="text-primary font-semibold text-xs">{['PG', 'SG', 'SF', 'PF', 'C'][index]}</span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-foreground font-medium text-sm truncate">{player.name}</div>
