@@ -221,9 +221,6 @@ export function CoachingLineup() {
                         onClick={(e) => e.stopPropagation()}
                       />
                       <span className="text-xs text-muted-foreground">min</span>
-                      <div className="w-8 h-8 flex items-center justify-center">
-                        <ArrowUp className="w-4 h-4 text-muted-foreground" />
-                      </div>
                     </div>
                   </div>
                   ))
