@@ -15,21 +15,24 @@ export function TeamSelection() {
 
   const { data: teams, isLoading, error } = useQuery({
     queryKey: ["/api/teams"],
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 
-  // Fallback to manual fetch if query fails
+  // Immediate manual fetch on mount for faster loading
   useEffect(() => {
-    if (!teams && !isLoading) {
-      console.log("Team Selection - Fetching teams manually...");
-      fetch('/api/teams')
-        .then(res => res.json())
-        .then(data => {
-          console.log("Team Selection - Manual fetch successful:", data);
-          setManualTeams(data);
-        })
-        .catch(err => console.error('Manual fetch failed:', err));
-    }
-  }, [teams, isLoading]);
+    const fetchTeams = async () => {
+      try {
+        const res = await fetch('/api/teams');
+        const data = await res.json();
+        setManualTeams(data);
+      } catch (err) {
+        console.error('Manual fetch failed:', err);
+      }
+    };
+    
+    fetchTeams();
+  }, []); // Run immediately on mount
 
   const teamsData = teams || manualTeams;
   const selectedTeam = teamsData?.find((team: Team) => team.id === selectedTeamId);
@@ -41,11 +44,10 @@ export function TeamSelection() {
     }
   };
 
-  console.log("Team Selection - Teams:", teams);
-  console.log("Team Selection - Manual Teams:", manualTeams);
-  console.log("Team Selection - Combined Teams Data:", teamsData);
-  console.log("Team Selection - Selected Team ID:", selectedTeamId);
-  console.log("Team Selection - Selected Team:", selectedTeam);
+  // Minimal logging
+  if (teamsData && teamsData.length > 0 && !selectedTeamId) {
+    console.log("Team Selection - Teams loaded successfully");
+  }
 
   if (isLoading) {
     return (

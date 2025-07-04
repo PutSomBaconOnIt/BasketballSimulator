@@ -19,30 +19,42 @@ export function Dashboard() {
 
   const { data: teams, isLoading: teamsLoading } = useQuery({
     queryKey: ["/api/teams"],
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 
   const { data: games, isLoading: gamesLoading } = useQuery({
     queryKey: ["/api/games"],
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 
-  // Fallback to manual fetch if queries fail
+  // Immediate manual fetch on mount for faster loading
   useEffect(() => {
-    if (!teams && !teamsLoading) {
-      fetch('/api/teams')
-        .then(res => res.json())
-        .then(data => setManualTeams(data))
-        .catch(err => console.error('Manual teams fetch failed:', err));
-    }
-  }, [teams, teamsLoading]);
-
-  useEffect(() => {
-    if (!games && !gamesLoading) {
-      fetch('/api/games')
-        .then(res => res.json())
-        .then(data => setManualGames(data))
-        .catch(err => console.error('Manual games fetch failed:', err));
-    }
-  }, [games, gamesLoading]);
+    const fetchData = async () => {
+      if (!teams) {
+        try {
+          const teamsRes = await fetch('/api/teams');
+          const teamsData = await teamsRes.json();
+          setManualTeams(teamsData);
+        } catch (err) {
+          console.error('Manual teams fetch failed:', err);
+        }
+      }
+      
+      if (!games) {
+        try {
+          const gamesRes = await fetch('/api/games');
+          const gamesData = await gamesRes.json();
+          setManualGames(gamesData);
+        } catch (err) {
+          console.error('Manual games fetch failed:', err);
+        }
+      }
+    };
+    
+    fetchData();
+  }, []); // Run immediately on mount
 
   const teamsData = teams || manualTeams;
   const gamesData = games || manualGames;
@@ -52,28 +64,25 @@ export function Dashboard() {
     ? teamsData?.find((team: Team) => team.id === selectedTeamId)
     : teamsData?.[0] as Team;
 
-  console.log("Dashboard - Location:", location);
-  console.log("Dashboard - Window Search:", window.location.search);
-  console.log("Dashboard - Selected Team ID:", selectedTeamId);
-  console.log("Dashboard - Teams:", teams);
-  console.log("Dashboard - Manual Teams:", manualTeams);
-  console.log("Dashboard - Combined Teams Data:", teamsData);
-  console.log("Dashboard - User Team:", userTeam);
+  // Minimal logging for debugging
+  if (!userTeam) {
+    console.log("Dashboard - No team data available yet");
+  }
 
   // Get recent games for user's team
-  const recentGames = games?.filter((game: Game) => 
+  const recentGames = gamesData?.filter((game: Game) => 
     game.homeTeamId === userTeam?.id || game.awayTeamId === userTeam?.id
   ).slice(-5);
 
   // Get next game
-  const nextGame = games?.find((game: Game) => 
+  const nextGame = gamesData?.find((game: Game) => 
     game.status === "scheduled" && 
     (game.homeTeamId === userTeam?.id || game.awayTeamId === userTeam?.id)
   );
 
   const getOpponentTeam = (game: Game) => {
     const opponentId = game.homeTeamId === userTeam?.id ? game.awayTeamId : game.homeTeamId;
-    return teams?.find((t: Team) => t.id === opponentId);
+    return teamsData?.find((t: Team) => t.id === opponentId);
   };
 
   const getGameResult = (game: Game) => {
