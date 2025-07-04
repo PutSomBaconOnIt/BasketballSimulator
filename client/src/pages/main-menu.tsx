@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,14 +20,24 @@ import type { Team } from "@shared/schema";
 
 export function MainMenu() {
   const [selectedTeamId, setSelectedTeamId] = useState<string>("");
+  const [manualTeams, setManualTeams] = useState<Team[]>([]);
 
   const { data: teams, isLoading, error } = useQuery({
     queryKey: ["/api/teams"],
   });
 
-  console.log("Teams data:", teams, "Loading:", isLoading, "Error:", error);
+  // Fallback manual data fetch
+  useEffect(() => {
+    if (!teams && !isLoading) {
+      fetch('/api/teams')
+        .then(res => res.json())
+        .then(data => setManualTeams(data))
+        .catch(err => console.error('Manual fetch failed:', err));
+    }
+  }, [teams, isLoading]);
 
-  const selectedTeam = teams?.find((team: Team) => team.id === selectedTeamId);
+  const teamsData = teams || manualTeams;
+  const selectedTeam = teamsData?.find((team: Team) => team.id === selectedTeamId);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
@@ -66,15 +76,25 @@ export function MainMenu() {
                       <SelectValue placeholder="Select your team to manage..." />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-slate-600">
-                      {teams?.map((team: Team) => (
-                        <SelectItem 
-                          key={team.id} 
-                          value={team.id} 
-                          className="text-white hover:bg-slate-600 focus:bg-slate-600 focus:text-white"
-                        >
-                          {team.city} {team.name}
+                      {isLoading ? (
+                        <SelectItem value="loading" disabled className="text-slate-400">
+                          Loading teams...
                         </SelectItem>
-                      ))}
+                      ) : teamsData && teamsData.length > 0 ? (
+                        teamsData.map((team: Team) => (
+                          <SelectItem 
+                            key={team.id} 
+                            value={team.id} 
+                            className="text-white hover:bg-slate-600 focus:bg-slate-600 focus:text-white"
+                          >
+                            {team.city} {team.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="no-teams" disabled className="text-slate-400">
+                          No teams available
+                        </SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
