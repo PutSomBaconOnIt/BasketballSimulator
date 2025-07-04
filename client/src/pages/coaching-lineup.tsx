@@ -9,6 +9,7 @@ import { PlayerDetailModal } from "@/components/player-detail-modal";
 
 export function CoachingLineup() {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [swapMode, setSwapMode] = useState(false);
   const [startersList, setStartersList] = useState<Player[]>([]);
   const [benchList, setBenchList] = useState<Player[]>([]);
   const [manualPlayers, setManualPlayers] = useState<Player[]>([]);
@@ -181,8 +182,19 @@ export function CoachingLineup() {
 
 
   const handlePlayerSwap = (player: Player) => {
+    // Only allow swapping when swap mode is enabled
+    if (!swapMode) {
+      return;
+    }
+
     if (!selectedPlayer) {
       setSelectedPlayer(player);
+      return;
+    }
+
+    // Prevent selecting the same player twice
+    if (selectedPlayer.id === player.id) {
+      setSelectedPlayer(null);
       return;
     }
 
@@ -311,11 +323,18 @@ export function CoachingLineup() {
 
       <div className="flex-1 overflow-y-auto p-6">
         {/* Instructions */}
-        {selectedPlayer && (
+        {swapMode && !selectedPlayer && (
+          <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+            <p className="text-sm text-foreground">
+              <span className="font-medium">Swap Mode Active:</span> Click any player to select them for swapping.
+            </p>
+          </div>
+        )}
+        {swapMode && selectedPlayer && (
           <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-lg">
             <p className="text-sm text-foreground">
               <span className="font-medium">{selectedPlayer.name}</span> is selected. 
-              Click on any bench player to promote them to the starting lineup.
+              Click another player to swap their positions.
             </p>
           </div>
         )}
@@ -330,31 +349,40 @@ export function CoachingLineup() {
                   Starting Lineup
                 </div>
                 <Button
-                  variant="outline"
+                  variant={swapMode ? "default" : "outline"}
                   size="sm"
                   onClick={() => {
+                    setSwapMode(!swapMode);
                     setSelectedPlayer(null);
-                    // Show instruction message
                   }}
-                  className="text-xs hover:bg-primary/10 border-primary/20"
-                  title="Click to swap starters with bench players"
+                  className={`text-xs ${swapMode 
+                    ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
+                    : 'hover:bg-primary/10 border-primary/20'
+                  }`}
+                  title="Click to enable/disable swap mode"
                 >
                   <ArrowUp className="w-3 h-3 mr-1" />
-                  Swap with Bench
+                  {swapMode ? 'Exit Swap Mode' : 'Swap with Bench'}
                 </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="mb-4 p-3 bg-muted/30 rounded-lg border border-muted">
-                <p className="text-xs text-muted-foreground">
-                  💡 To change your starting lineup: Click "Swap with Bench", then click any starter and then any bench player to swap their positions.
-                </p>
-              </div>
+              {!swapMode && (
+                <div className="mb-4 p-3 bg-muted/30 rounded-lg border border-muted">
+                  <p className="text-xs text-muted-foreground">
+                    💡 To change your starting lineup: Click "Swap with Bench" to enable swap mode, then select players to swap positions.
+                  </p>
+                </div>
+              )}
               <div className="space-y-4">
                 {startersList.map((player: Player, index: number) => (
-                  <div key={player.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
-                    selectedPlayer?.id === player.id ? 'bg-primary/20 border-2 border-primary' : 'bg-muted hover:bg-muted/70'
-                  }`}>
+                  <div 
+                    key={player.id} 
+                    className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                      selectedPlayer?.id === player.id ? 'bg-primary/20 border-2 border-primary' : 'bg-muted hover:bg-muted/70'
+                    } ${swapMode ? 'cursor-pointer' : ''}`}
+                    onClick={swapMode ? () => handlePlayerSwap(player) : undefined}
+                  >
                     <div className="flex items-center space-x-2 flex-1">
                       <Button
                         variant="ghost"
