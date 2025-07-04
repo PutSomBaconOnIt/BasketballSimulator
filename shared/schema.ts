@@ -20,6 +20,10 @@ export const playerSchema = z.object({
   salary: z.number().min(0),
   contractYears: z.number().min(0).max(10),
   
+  // Physical measurements
+  height: z.number().min(60).max(90), // Height in inches
+  weight: z.number().min(150).max(350), // Weight in pounds
+  
   // Ratings (0-100)
   overall: z.number().min(0).max(100),
   offense: z.number().min(0).max(100),

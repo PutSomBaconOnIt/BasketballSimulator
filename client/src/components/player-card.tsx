@@ -1,17 +1,18 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, ArrowLeftRight } from "lucide-react";
+import { Edit, ArrowLeftRight, Info } from "lucide-react";
 import type { Player } from "@shared/schema";
 
 interface PlayerCardProps {
   player: Player;
   onEdit?: () => void;
   onTrade?: () => void;
+  onInfo?: () => void;
   showActions?: boolean;
 }
 
-export function PlayerCard({ player, onEdit, onTrade, showActions = true }: PlayerCardProps) {
+export function PlayerCard({ player, onEdit, onTrade, onInfo, showActions = true }: PlayerCardProps) {
   const getRatingColor = (rating: number) => {
     if (rating >= 90) return "rating-excellent";
     if (rating >= 80) return "rating-good";
@@ -73,8 +74,18 @@ export function PlayerCard({ player, onEdit, onTrade, showActions = true }: Play
                 <Button
                   variant="ghost"
                   size="sm"
+                  onClick={onInfo}
+                  className="text-muted-foreground hover:text-blue-400"
+                  title="View Player Details"
+                >
+                  <Info className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={onEdit}
                   className="text-muted-foreground hover:text-foreground"
+                  title="Edit Player"
                 >
                   <Edit className="w-4 h-4" />
                 </Button>
@@ -83,6 +94,7 @@ export function PlayerCard({ player, onEdit, onTrade, showActions = true }: Play
                   size="sm"
                   onClick={onTrade}
                   className="text-muted-foreground hover:text-destructive"
+                  title="Trade Player"
                 >
                   <ArrowLeftRight className="w-4 h-4" />
                 </Button>

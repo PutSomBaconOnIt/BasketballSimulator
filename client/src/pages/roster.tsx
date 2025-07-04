@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/layout/header";
 import { PlayerCard } from "@/components/player-card";
+import { PlayerDetailModal } from "@/components/player-detail-modal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,20 @@ export function Roster() {
   const [manualCoaches, setManualCoaches] = useState<Coach[]>([]);
   const [manualTrainings, setManualTrainings] = useState<Training[]>([]);
   const [manualPlayers, setManualPlayers] = useState<Player[]>([]);
+
+  // Player detail modal state
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
+
+  const handlePlayerInfo = (player: Player) => {
+    setSelectedPlayer(player);
+    setIsPlayerModalOpen(true);
+  };
+
+  const handleClosePlayerModal = () => {
+    setSelectedPlayer(null);
+    setIsPlayerModalOpen(false);
+  };
 
   const { data: teams } = useQuery({
     queryKey: ["/api/teams"],
@@ -216,7 +231,11 @@ export function Roster() {
                   <h3 className="text-lg font-semibold text-foreground mb-4">Starting Lineup</h3>
                   <div className="space-y-3">
                     {starters.map((player: Player) => (
-                      <PlayerCard key={player.id} player={player} />
+                      <PlayerCard 
+                        key={player.id} 
+                        player={player} 
+                        onInfo={() => handlePlayerInfo(player)}
+                      />
                     ))}
                   </div>
                 </div>
@@ -226,7 +245,11 @@ export function Roster() {
                   <h3 className="text-lg font-semibold text-foreground mb-4">Bench</h3>
                   <div className="space-y-3">
                     {bench.map((player: Player) => (
-                      <PlayerCard key={player.id} player={player} />
+                      <PlayerCard 
+                        key={player.id} 
+                        player={player} 
+                        onInfo={() => handlePlayerInfo(player)}
+                      />
                     ))}
                   </div>
                 </div>
@@ -392,6 +415,12 @@ export function Roster() {
           </div>
         </div>
       </div>
+      
+      <PlayerDetailModal
+        player={selectedPlayer}
+        isOpen={isPlayerModalOpen}
+        onClose={handleClosePlayerModal}
+      />
     </div>
   );
 }
