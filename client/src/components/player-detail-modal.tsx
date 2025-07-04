@@ -103,15 +103,124 @@ export function PlayerDetailModal({ player, isOpen, onClose }: PlayerDetailModal
             </div>
           </div>
 
-          {/* Overall Rating */}
+          {/* Player Ratings */}
           <div className="border-t border-gray-700 pt-4">
-            <h3 className="text-sm font-medium text-gray-400 mb-3">Overall Rating</h3>
-            <div className="flex items-center justify-center">
+            <h3 className="text-sm font-medium text-gray-400 mb-3">Player Ratings</h3>
+            
+            {/* Overall Rating - Featured */}
+            <div className="flex items-center justify-center mb-4">
               <div className="text-center">
                 <div className="text-3xl font-bold text-blue-400 mb-1">
                   {player.overall}
                 </div>
-                <div className="text-sm text-gray-400">OVR</div>
+                <div className="text-sm text-gray-400">Overall Rating</div>
+              </div>
+            </div>
+
+            {/* Detailed Ratings Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-gray-800 rounded-lg p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-400">Offense</span>
+                  <span className="text-lg font-bold text-orange-400">{player.offense}</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div 
+                    className="bg-orange-400 h-2 rounded-full" 
+                    style={{ width: `${player.offense}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="bg-gray-800 rounded-lg p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-400">Defense</span>
+                  <span className="text-lg font-bold text-red-400">{player.defense}</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div 
+                    className="bg-red-400 h-2 rounded-full" 
+                    style={{ width: `${player.defense}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="bg-gray-800 rounded-lg p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-400">Speed</span>
+                  <span className="text-lg font-bold text-green-400">{player.speed}</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div 
+                    className="bg-green-400 h-2 rounded-full" 
+                    style={{ width: `${player.speed}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="bg-gray-800 rounded-lg p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-400">Shooting</span>
+                  <span className="text-lg font-bold text-purple-400">{player.shooting}</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div 
+                    className="bg-purple-400 h-2 rounded-full" 
+                    style={{ width: `${player.shooting}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="bg-gray-800 rounded-lg p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-400">3-Point</span>
+                  <span className="text-lg font-bold text-cyan-400">{player.threePoint}</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div 
+                    className="bg-cyan-400 h-2 rounded-full" 
+                    style={{ width: `${player.threePoint}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="bg-gray-800 rounded-lg p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-400">Rebounding</span>
+                  <span className="text-lg font-bold text-yellow-400">{player.rebounding}</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div 
+                    className="bg-yellow-400 h-2 rounded-full" 
+                    style={{ width: `${player.rebounding}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="bg-gray-800 rounded-lg p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-400">Passing</span>
+                  <span className="text-lg font-bold text-indigo-400">{player.passing}</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div 
+                    className="bg-indigo-400 h-2 rounded-full" 
+                    style={{ width: `${player.passing}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="bg-gray-800 rounded-lg p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-400">Potential</span>
+                  <span className="text-lg font-bold text-pink-400">{player.potential}</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div 
+                    className="bg-pink-400 h-2 rounded-full" 
+                    style={{ width: `${player.potential}%` }}
+                  ></div>
+                </div>
               </div>
             </div>
           </div>
