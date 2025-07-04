@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ import type { Team } from "@shared/schema";
 export function MainMenu() {
   const [selectedTeamId, setSelectedTeamId] = useState<string>("");
   const [manualTeams, setManualTeams] = useState<Team[]>([]);
+  const [, setLocation] = useLocation();
 
   const { data: teams, isLoading, error } = useQuery({
     queryKey: ["/api/teams"],
@@ -206,7 +207,7 @@ export function MainMenu() {
                 onClick={() => {
                   if (selectedTeamId) {
                     console.log("Navigating to dashboard with team:", selectedTeamId);
-                    window.location.href = `/dashboard?team=${selectedTeamId}`;
+                    setLocation(`/dashboard?team=${selectedTeamId}`);
                   }
                 }}
               >
@@ -221,7 +222,7 @@ export function MainMenu() {
                 onClick={() => {
                   if (selectedTeamId) {
                     console.log("Navigating to roster with team:", selectedTeamId);
-                    window.location.href = `/roster?team=${selectedTeamId}`;
+                    setLocation(`/roster?team=${selectedTeamId}`);
                   }
                 }}
               >
