@@ -67,7 +67,7 @@ function App() {
           
           <Route path="/coaching/lineup">
             {() => (
-              <div className="h-screen overflow-hidden bg-background">
+              <div className="min-h-screen bg-background">
                 <CoachingLineup />
               </div>
             )}
@@ -75,7 +75,7 @@ function App() {
           
           <Route path="/coaching/training">
             {() => (
-              <div className="h-screen overflow-hidden bg-background">
+              <div className="min-h-screen bg-background">
                 <CoachingTraining />
               </div>
             )}

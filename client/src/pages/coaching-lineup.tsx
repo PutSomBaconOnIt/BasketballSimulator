@@ -132,7 +132,7 @@ export function CoachingLineup() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen bg-background p-6 overflow-y-auto">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
