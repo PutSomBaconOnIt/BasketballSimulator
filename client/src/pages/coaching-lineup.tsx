@@ -127,13 +127,53 @@ export function CoachingLineup() {
   // Initialize lineups when players data is available
   useEffect(() => {
     if (lakersPlayers.length > 0 && startersList.length === 0) {
-      const starters = lakersPlayers.slice(0, 5);
-      const bench = lakersPlayers.slice(5);
+      // Sort players by position order: PG, SG, SF, PF, C
+      const positionOrder = ['PG', 'SG', 'SF', 'PF', 'C'];
+      const playersByPosition: { [key: string]: Player[] } = {};
+      
+      // Group players by position
+      lakersPlayers.forEach(player => {
+        if (!playersByPosition[player.position]) {
+          playersByPosition[player.position] = [];
+        }
+        playersByPosition[player.position].push(player);
+      });
+      
+      // Sort each position group by overall rating (highest first)
+      Object.keys(playersByPosition).forEach(position => {
+        playersByPosition[position].sort((a, b) => b.overall - a.overall);
+      });
+      
+      // Create starting lineup with one player from each position in order
+      const starters: Player[] = [];
+      const remainingPlayers: Player[] = [];
+      
+      positionOrder.forEach(position => {
+        const positionPlayers = playersByPosition[position] || [];
+        if (positionPlayers.length > 0) {
+          starters.push(positionPlayers[0]); // Best player for this position
+          remainingPlayers.push(...positionPlayers.slice(1)); // Rest go to bench
+        }
+      });
+      
+      // If we don't have all 5 positions, fill with best remaining players
+      const allRemaining = lakersPlayers.filter(p => !starters.includes(p))
+        .sort((a, b) => b.overall - a.overall);
+      
+      while (starters.length < 5 && allRemaining.length > 0) {
+        starters.push(allRemaining.shift()!);
+      }
+      
+      // Bench is everyone else, sorted by overall rating
+      const bench = allRemaining.sort((a, b) => b.overall - a.overall);
+      
       setStartersList(starters);
       setBenchList(bench);
+      
       console.log("Lineup - Total Lakers players:", lakersPlayers.length);
       console.log("Lineup - Starters count:", starters.length);
       console.log("Lineup - Bench count:", bench.length);
+      console.log("Lineup - Starters by position:", starters.map(p => `${p.position}: ${p.name}`));
       console.log("Lineup - Bench players:", bench.map(p => p.name));
     }
   }, [lakersPlayers.length]);
