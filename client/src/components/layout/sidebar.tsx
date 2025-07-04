@@ -38,12 +38,14 @@ export function Sidebar() {
     <div className="w-64 bg-sidebar-bg border-r border-border flex flex-col">
       {/* Logo */}
       <div className="p-6 border-b border-border">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-            <Zap className="w-4 h-4 text-primary-foreground" />
+        <Link href="/">
+          <div className="flex items-center space-x-3 hover:bg-sidebar-accent rounded-lg p-2 -m-2 transition-colors cursor-pointer">
+            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+              <Zap className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <span className="text-xl font-bold text-foreground">Basketball Sim</span>
           </div>
-          <span className="text-xl font-bold text-foreground">Basketball Sim</span>
-        </div>
+        </Link>
       </div>
 
       {/* Navigation */}
