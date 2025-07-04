@@ -125,9 +125,55 @@ export function CoachingLineup() {
   const remainingMinutes = 240 - totalMinutes;
 
   const autoAdjustMinutes = () => {
-    // Auto-adjust: starters get 32 minutes each, 6th man gets 20-30 minutes based on position need
-    const newStarterMinutes = [32, 32, 32, 32, 32];
-    const totalStarterMinutes = 160;
+    // Dynamic starter minute allocation based on overall ratings
+    const calculateStarterMinutes = () => {
+      const starterPlayers = startersList.filter((player: Player | null) => player !== null);
+      const baseStarterMinutes = 32;
+      let starterMinutes = Array(5).fill(baseStarterMinutes);
+      
+      if (starterPlayers.length === 5) {
+        // Calculate position-based adjustments
+        const positions = ['PG', 'SG', 'SF', 'PF', 'C'];
+        
+        positions.forEach((position, index) => {
+          const player = starterPlayers[index];
+          if (!player) return;
+          
+          // Compare to same position players on team
+          const samePositionPlayers = [...startersList, ...benchList].filter((p: Player | null) => 
+            p && p.position === position
+          );
+          
+          if (samePositionPlayers.length > 1) {
+            const avgOverall = samePositionPlayers.reduce((sum, p) => sum + p.overall, 0) / samePositionPlayers.length;
+            const overallDiff = player.overall - avgOverall;
+            
+            // Adjust starter minutes based on rating (+/- 1 minute per overall point difference)
+            const adjustment = Math.round(overallDiff * 0.8);
+            starterMinutes[index] = Math.max(25, Math.min(38, baseStarterMinutes + adjustment));
+          }
+        });
+        
+        // Ensure total starter minutes stays around 160
+        const currentTotal = starterMinutes.reduce((sum, mins) => sum + mins, 0);
+        const targetTotal = 160;
+        const difference = targetTotal - currentTotal;
+        
+        if (difference !== 0) {
+          // Distribute difference proportionally
+          starterMinutes = starterMinutes.map(mins => {
+            const proportion = mins / currentTotal;
+            const adjustment = Math.round(difference * proportion);
+            return Math.max(25, Math.min(38, mins + adjustment));
+          });
+        }
+      }
+      
+      return starterMinutes;
+    };
+
+    const newStarterMinutes = calculateStarterMinutes();
+    const totalStarterMinutes = newStarterMinutes.reduce((sum, mins) => sum + mins, 0);
     
     // 6th man gets 25 minutes (middle of 20-30 range)
     const sixthManMinutes = 25;
@@ -135,20 +181,75 @@ export function CoachingLineup() {
     // Remaining minutes after starters and 6th man
     const remainingAfterSixthMan = 240 - totalStarterMinutes - sixthManMinutes; // 55 minutes left
     
-    // Distribute remaining minutes with role players getting more than bench players
-    // Total available for bench: 240 - 160 (starters) = 80 minutes
-    const rolePlayerMinutes = 18; // Role players get more minutes
-    const benchPlayerMinutes = 11; // Bench players get fewer minutes
-    // 6th man: 25, Role players: 36 (18x2), Bench players: 22 (11x2) = 83 total
-    // Adjust to fit exactly 80 minutes: 6th man gets 22, others stay same
-    const adjustedSixthManMinutes = 22;
-    
-    const newBenchMinutes = Array(10).fill(0).map((_, index) => {
-      if (index === 0) return adjustedSixthManMinutes; // 6th man gets 22 minutes
-      if (index >= 1 && index <= 2) return rolePlayerMinutes; // Role players get 18 minutes each
-      if (index >= 3 && index <= 4) return benchPlayerMinutes; // Bench players get 11 minutes each
-      return 0; // Out of Rotation (slots 5-7) and Inactive (slots 8-9) get 0 minutes
-    });
+    // Dynamic minute allocation based on player overall ratings and roles
+    const calculateDynamicMinutes = () => {
+      // Get all active bench players (slots 0-4)
+      const activeBenchPlayers = benchList.slice(0, 5).filter(player => player !== null);
+      const totalBenchMinutes = 240 - totalStarterMinutes; // Remaining minutes after dynamic starter allocation
+      
+      if (activeBenchPlayers.length === 0) {
+        return Array(10).fill(0);
+      }
+
+      // Calculate base minutes for each role
+      const roleBaselines = {
+        6: 28,    // 6th man baseline
+        role: 20, // Role player baseline 
+        bench: 12 // Bench player baseline
+      };
+
+      // Calculate minutes for each player based on overall rating and role
+      const playerMinutes = Array(10).fill(0);
+      let allocatedMinutes = 0;
+
+      activeBenchPlayers.forEach((player, index) => {
+        if (!player) return;
+
+        let baseMinutes;
+        if (index === 0) baseMinutes = roleBaselines[6];
+        else if (index <= 2) baseMinutes = roleBaselines.role;
+        else baseMinutes = roleBaselines.bench;
+
+        // Adjust based on overall rating relative to position average
+        const positionPlayers = activeBenchPlayers.filter(p => p && p.position === player.position);
+        if (positionPlayers.length > 1) {
+          const avgOverall = positionPlayers.reduce((sum, p) => sum + p.overall, 0) / positionPlayers.length;
+          const overallDiff = player.overall - avgOverall;
+          
+          // Adjust minutes based on rating difference (+/- 2 minutes per overall point difference)
+          const adjustment = Math.round(overallDiff * 1.5);
+          baseMinutes = Math.max(5, Math.min(35, baseMinutes + adjustment));
+        }
+
+        playerMinutes[index] = baseMinutes;
+        allocatedMinutes += baseMinutes;
+      });
+
+      // Redistribute to hit exactly 80 minutes
+      const difference = totalBenchMinutes - allocatedMinutes;
+      if (difference !== 0) {
+        // Distribute difference proportionally among active players
+        activeBenchPlayers.forEach((player, index) => {
+          if (!player) return;
+          const proportion = playerMinutes[index] / allocatedMinutes;
+          const adjustment = Math.round(difference * proportion);
+          playerMinutes[index] = Math.max(0, playerMinutes[index] + adjustment);
+        });
+      }
+
+      // Final adjustment to ensure exactly 80 minutes
+      const finalTotal = playerMinutes.slice(0, 5).reduce((sum, mins) => sum + mins, 0);
+      const finalDiff = totalBenchMinutes - finalTotal;
+      if (finalDiff !== 0) {
+        // Add/subtract from the highest minute player
+        const maxIndex = playerMinutes.slice(0, 5).indexOf(Math.max(...playerMinutes.slice(0, 5)));
+        playerMinutes[maxIndex] = Math.max(0, playerMinutes[maxIndex] + finalDiff);
+      }
+
+      return playerMinutes;
+    };
+
+    const newBenchMinutes = calculateDynamicMinutes();
     
     setStarterMinutes(newStarterMinutes);
     setBenchMinutes(newBenchMinutes);
