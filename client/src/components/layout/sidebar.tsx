@@ -8,7 +8,6 @@ import {
   Search, 
   Trophy, 
   ArrowLeftRight, 
-  Dumbbell, 
   Handshake, 
   BarChart3,
   Zap
@@ -22,7 +21,6 @@ const getNavigation = (teamId?: string) => {
     { name: "Player Database", href: `/players${teamParam}`, icon: Search },
     { name: "Draft Room", href: `/draft${teamParam}`, icon: Trophy },
     { name: "Trades", href: `/trades${teamParam}`, icon: ArrowLeftRight },
-    { name: "Training", href: `/training${teamParam}`, icon: Dumbbell },
     { name: "Free Agency", href: `/free-agency${teamParam}`, icon: Handshake },
     { name: "Statistics", href: `/statistics${teamParam}`, icon: BarChart3 },
   ];

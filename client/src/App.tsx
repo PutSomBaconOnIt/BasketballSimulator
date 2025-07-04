@@ -9,7 +9,7 @@ import { Roster } from "@/pages/roster";
 import { PlayerDatabase } from "@/pages/player-database";
 import { Draft } from "@/pages/draft";
 import { Trades } from "@/pages/trades";
-import { Training } from "@/pages/training";
+
 import { FreeAgency } from "@/pages/free-agency";
 import { Statistics } from "@/pages/statistics";
 import NotFound from "@/pages/not-found";
@@ -83,16 +83,7 @@ function App() {
             )}
           </Route>
           
-          <Route path="/training">
-            {() => (
-              <div className="flex h-screen overflow-hidden bg-background">
-                <Sidebar />
-                <main className="flex-1 overflow-y-auto">
-                  <Training />
-                </main>
-              </div>
-            )}
-          </Route>
+
           
           <Route path="/free-agency">
             {() => (
