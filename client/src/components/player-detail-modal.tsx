@@ -1,8 +1,7 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Player } from "../../../shared/schema";
 
 interface PlayerDetailModalProps {
@@ -20,7 +19,7 @@ function formatHeight(heightInches: number): string {
 export function PlayerDetailModal({ player, isOpen, onClose }: PlayerDetailModalProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   
-  if (!player) return null;
+  if (!player || !isOpen) return null;
 
   const slides = [
     { title: "Personal Information", key: "personal" },
@@ -40,17 +39,52 @@ export function PlayerDetailModal({ player, isOpen, onClose }: PlayerDetailModal
     onClose();
   };
 
+  // Handle escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden'; // Prevent background scroll
+    }
+    
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px] bg-gray-900 border-gray-700 relative z-50">
-        <DialogHeader>
-          <div className="text-center">
-            <DialogTitle className="text-xl font-bold text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/80" 
+        onClick={handleClose}
+      />
+      
+      {/* Modal Content */}
+      <div className="relative w-full max-w-md mx-4 bg-gray-900 border border-gray-700 rounded-lg shadow-xl">
+        {/* Header */}
+        <div className="relative p-6 border-b border-gray-700">
+          {/* Close Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClose}
+            className="absolute right-2 top-2 p-1 h-8 w-8 text-gray-400 hover:text-white"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+          
+          <div className="text-center pr-10">
+            <h2 className="text-xl font-bold text-white">
               {player.name}
-            </DialogTitle>
+            </h2>
             <p className="text-sm text-gray-400">{slides[currentSlide].title}</p>
           </div>
-        </DialogHeader>
+        </div>
 
         {/* Left Arrow - Centered on side */}
         <Button
@@ -74,7 +108,7 @@ export function PlayerDetailModal({ player, isOpen, onClose }: PlayerDetailModal
           <ChevronRight className="h-5 w-5" />
         </Button>
         
-        <div className="space-y-6">
+        <div className="p-6 space-y-6">
           {/* Player Name and Position */}
           <div className="text-center">
             <Badge variant="secondary" className="text-lg px-3 py-1">
@@ -275,7 +309,7 @@ export function PlayerDetailModal({ player, isOpen, onClose }: PlayerDetailModal
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
