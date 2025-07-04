@@ -324,12 +324,32 @@ export function CoachingLineup() {
           {/* Starting Lineup */}
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-foreground flex items-center">
-                <Target className="w-5 h-5 mr-2 text-green-500" />
-                Starting Lineup
+              <CardTitle className="text-foreground flex items-center justify-between">
+                <div className="flex items-center">
+                  <Target className="w-5 h-5 mr-2 text-green-500" />
+                  Starting Lineup
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedPlayer(null);
+                    // Show instruction message
+                  }}
+                  className="text-xs hover:bg-primary/10 border-primary/20"
+                  title="Click to swap starters with bench players"
+                >
+                  <ArrowUp className="w-3 h-3 mr-1" />
+                  Swap with Bench
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="mb-4 p-3 bg-muted/30 rounded-lg border border-muted">
+                <p className="text-xs text-muted-foreground">
+                  💡 To change your starting lineup: Click "Swap with Bench", then click any starter and then any bench player to swap their positions.
+                </p>
+              </div>
               <div className="space-y-4">
                 {startersList.map((player: Player, index: number) => (
                   <div key={player.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
