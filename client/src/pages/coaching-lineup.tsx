@@ -110,15 +110,55 @@ export function CoachingLineup() {
 
   const adjustStarterMinutes = (index: number, change: number) => {
     const newMinutes = [...starterMinutes];
+    const currentTotal = starterMinutes.reduce((a, b) => a + b, 0) + benchMinutes.reduce((a, b) => a + b, 0);
+    const remainingMinutes = 240 - currentTotal;
+    
+    // If trying to increase and no minutes remaining, don't allow
+    if (change > 0 && remainingMinutes <= 0) {
+      return;
+    }
+    
     const newValue = Math.max(0, Math.min(48, newMinutes[index] + change));
-    newMinutes[index] = newValue;
+    
+    // If increasing, check if we have enough remaining minutes
+    if (change > 0) {
+      const minutesNeeded = newValue - newMinutes[index];
+      if (minutesNeeded > remainingMinutes) {
+        newMinutes[index] = newMinutes[index] + remainingMinutes;
+      } else {
+        newMinutes[index] = newValue;
+      }
+    } else {
+      newMinutes[index] = newValue;
+    }
+    
     setStarterMinutes(newMinutes);
   };
 
   const adjustBenchMinutes = (index: number, change: number) => {
     const newMinutes = [...benchMinutes];
+    const currentTotal = starterMinutes.reduce((a, b) => a + b, 0) + benchMinutes.reduce((a, b) => a + b, 0);
+    const remainingMinutes = 240 - currentTotal;
+    
+    // If trying to increase and no minutes remaining, don't allow
+    if (change > 0 && remainingMinutes <= 0) {
+      return;
+    }
+    
     const newValue = Math.max(0, Math.min(48, newMinutes[index] + change));
-    newMinutes[index] = newValue;
+    
+    // If increasing, check if we have enough remaining minutes
+    if (change > 0) {
+      const minutesNeeded = newValue - newMinutes[index];
+      if (minutesNeeded > remainingMinutes) {
+        newMinutes[index] = newMinutes[index] + remainingMinutes;
+      } else {
+        newMinutes[index] = newValue;
+      }
+    } else {
+      newMinutes[index] = newValue;
+    }
+    
     setBenchMinutes(newMinutes);
   };
 
@@ -203,7 +243,13 @@ export function CoachingLineup() {
                         value={starterMinutes[index] || 32}
                         onChange={(e) => {
                           const newMinutes = [...starterMinutes];
-                          newMinutes[index] = Math.max(0, Math.min(48, parseInt(e.target.value) || 0));
+                          const inputValue = Math.max(0, Math.min(48, parseInt(e.target.value) || 0));
+                          const currentTotal = starterMinutes.reduce((a, b) => a + b, 0) + benchMinutes.reduce((a, b) => a + b, 0);
+                          const remainingMinutes = 240 - currentTotal;
+                          const currentPlayerMinutes = starterMinutes[index] || 0;
+                          const maxAllowedMinutes = currentPlayerMinutes + remainingMinutes;
+                          
+                          newMinutes[index] = Math.min(inputValue, maxAllowedMinutes);
                           setStarterMinutes(newMinutes);
                         }}
                         min="0" 
@@ -293,7 +339,13 @@ export function CoachingLineup() {
                         value={benchMinutes[index] || 0}
                         onChange={(e) => {
                           const newMinutes = [...benchMinutes];
-                          newMinutes[index] = Math.max(0, Math.min(48, parseInt(e.target.value) || 0));
+                          const inputValue = Math.max(0, Math.min(48, parseInt(e.target.value) || 0));
+                          const currentTotal = starterMinutes.reduce((a, b) => a + b, 0) + benchMinutes.reduce((a, b) => a + b, 0);
+                          const remainingMinutes = 240 - currentTotal;
+                          const currentPlayerMinutes = benchMinutes[index] || 0;
+                          const maxAllowedMinutes = currentPlayerMinutes + remainingMinutes;
+                          
+                          newMinutes[index] = Math.min(inputValue, maxAllowedMinutes);
                           setBenchMinutes(newMinutes);
                         }}
                         min="0" 
