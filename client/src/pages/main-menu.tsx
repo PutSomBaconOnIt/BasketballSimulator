@@ -39,6 +39,10 @@ export function MainMenu() {
   const teamsData = teams || manualTeams;
   const selectedTeam = teamsData?.find((team: Team) => team.id === selectedTeamId);
 
+  console.log("Main Menu - Selected Team ID:", selectedTeamId);
+  console.log("Main Menu - Teams Data:", teamsData);
+  console.log("Main Menu - Selected Team:", selectedTeam);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
       <div className="max-w-4xl w-full">
@@ -196,26 +200,34 @@ export function MainMenu() {
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-6">
-              <Link href={selectedTeamId ? `/dashboard?team=${selectedTeamId}` : "/dashboard"} className="flex-1">
-                <Button 
-                  className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3"
-                  disabled={!selectedTeamId}
-                >
-                  <Play className="w-5 h-5 mr-2" />
-                  Start Managing
-                </Button>
-              </Link>
+              <Button 
+                className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3"
+                disabled={!selectedTeamId}
+                onClick={() => {
+                  if (selectedTeamId) {
+                    console.log("Navigating to dashboard with team:", selectedTeamId);
+                    window.location.href = `/dashboard?team=${selectedTeamId}`;
+                  }
+                }}
+              >
+                <Play className="w-5 h-5 mr-2" />
+                Start Managing
+              </Button>
               
-              <Link href={selectedTeamId ? `/roster?team=${selectedTeamId}` : "/roster"} className="flex-1">
-                <Button 
-                  variant="outline" 
-                  className="w-full border-slate-600 text-white hover:bg-slate-700 py-3"
-                  disabled={!selectedTeamId}
-                >
-                  <Users className="w-5 h-5 mr-2" />
-                  View Roster
-                </Button>
-              </Link>
+              <Button 
+                variant="outline" 
+                className="w-full border-slate-600 text-white hover:bg-slate-700 py-3"
+                disabled={!selectedTeamId}
+                onClick={() => {
+                  if (selectedTeamId) {
+                    console.log("Navigating to roster with team:", selectedTeamId);
+                    window.location.href = `/roster?team=${selectedTeamId}`;
+                  }
+                }}
+              >
+                <Users className="w-5 h-5 mr-2" />
+                View Roster
+              </Button>
             </div>
 
             {!selectedTeamId && (
