@@ -26,6 +26,11 @@ export function Dashboard() {
     ? teams?.find((team: Team) => team.id === selectedTeamId)
     : teams?.[0] as Team;
 
+  console.log("Dashboard - Location:", location);
+  console.log("Dashboard - Selected Team ID:", selectedTeamId);
+  console.log("Dashboard - Teams:", teams);
+  console.log("Dashboard - User Team:", userTeam);
+
   // Get recent games for user's team
   const recentGames = games?.filter((game: Game) => 
     game.homeTeamId === userTeam?.id || game.awayTeamId === userTeam?.id

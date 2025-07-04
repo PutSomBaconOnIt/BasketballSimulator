@@ -37,6 +37,11 @@ export function Roster() {
     ? teams?.find((team: Team) => team.id === teamFromUrl)
     : teams?.[0] as Team;
 
+  console.log("Roster - Location:", location);
+  console.log("Roster - Team from URL:", teamFromUrl);
+  console.log("Roster - Teams:", teams);
+  console.log("Roster - User Team:", userTeam);
+
   const { data: players } = useQuery({
     queryKey: ["/api/players/team", userTeam?.id],
     enabled: !!userTeam,
