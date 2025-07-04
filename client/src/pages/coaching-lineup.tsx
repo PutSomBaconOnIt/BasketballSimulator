@@ -135,14 +135,14 @@ export function CoachingLineup() {
     // Remaining minutes after starters and 6th man
     const remainingAfterSixthMan = 240 - totalStarterMinutes - sixthManMinutes; // 55 minutes left
     
-    // Distribute remaining minutes among role players and bench players (slots 1-5)
-    const activeRoleAndBenchSlots = 5; // Slots 1-5 (role players + bench players)
+    // Distribute remaining minutes among role players and bench players (slots 1-4)
+    const activeRoleAndBenchSlots = 4; // Slots 1-4 (role players + bench players)
     const minutesPerRoleAndBench = activeRoleAndBenchSlots > 0 ? Math.floor(remainingAfterSixthMan / activeRoleAndBenchSlots) : 0;
     
     const newBenchMinutes = Array(10).fill(0).map((_, index) => {
       if (index === 0) return sixthManMinutes; // 6th man gets 25 minutes
-      if (index >= 1 && index <= 5) return minutesPerRoleAndBench; // Role players and bench get equal shares
-      return 0; // DNP and Inactive slots get 0 minutes
+      if (index >= 1 && index <= 4) return minutesPerRoleAndBench; // Role players and bench get equal shares
+      return 0; // DNP (slots 5-7) and Inactive (slots 8-9) get 0 minutes
     });
     
     setStarterMinutes(newStarterMinutes);
@@ -325,9 +325,9 @@ export function CoachingLineup() {
                 { slot: 2, role: "Role", label: "Role Player" },
                 { slot: 3, role: "Bench", label: "Bench Player" },
                 { slot: 4, role: "Bench", label: "Bench Player" },
-                { slot: 5, role: "Bench", label: "Bench Player" },
+                { slot: 5, role: "DNP", label: "Did Not Play" },
                 { slot: 6, role: "DNP", label: "Did Not Play" },
-                { slot: 7, role: "Inactive", label: "Inactive" },
+                { slot: 7, role: "DNP", label: "Did Not Play" },
                 { slot: 8, role: "Inactive", label: "Inactive" },
                 { slot: 9, role: "Inactive", label: "Inactive" }
               ];
@@ -338,8 +338,8 @@ export function CoachingLineup() {
                   "6th": "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800",
                   "Role": "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800", 
                   "Bench": "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800",
-                  "DNP": "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800",
-                  "Inactive": "bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800"
+                  "DNP": "bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800",
+                  "Inactive": "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
                 };
 
                 return (
