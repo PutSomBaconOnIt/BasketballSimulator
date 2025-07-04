@@ -10,7 +10,7 @@ import { useLocation } from "wouter";
 
 export function Dashboard() {
   const [location] = useLocation();
-  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const urlParams = new URLSearchParams(window.location.search);
   const selectedTeamId = urlParams.get('team');
 
   const { data: teams } = useQuery({
@@ -27,6 +27,7 @@ export function Dashboard() {
     : teams?.[0] as Team;
 
   console.log("Dashboard - Location:", location);
+  console.log("Dashboard - Window Search:", window.location.search);
   console.log("Dashboard - Selected Team ID:", selectedTeamId);
   console.log("Dashboard - Teams:", teams);
   console.log("Dashboard - User Team:", userTeam);

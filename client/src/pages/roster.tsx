@@ -16,7 +16,7 @@ export function Roster() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [location] = useLocation();
-  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const urlParams = new URLSearchParams(window.location.search);
   const teamFromUrl = urlParams.get('team');
 
 
