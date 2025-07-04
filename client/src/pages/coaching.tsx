@@ -12,13 +12,18 @@ export function Coaching() {
     queryKey: ["/api/players"],
   });
 
-  const { data: coaches } = useQuery({
+  const { data: coaches, isLoading: coachesLoading } = useQuery({
     queryKey: ["/api/coaches"],
   });
 
   // Get Lakers players (assuming first team is Lakers)
   const lakersPlayers = players?.filter((p: Player) => p.teamId) || [];
   const headCoach = coaches?.[0];
+
+  // Debug logging
+  console.log("Coaching - Coaches data:", coaches);
+  console.log("Coaching - Head coach:", headCoach);
+  console.log("Coaching - Loading state:", coachesLoading);
 
   return (
     <div className="flex-1 flex flex-col">
@@ -67,16 +72,16 @@ export function Coaching() {
                     <div className="space-y-2">
                       <label className="text-sm text-muted-foreground">Offensive Rating</label>
                       <div className="flex items-center space-x-2">
-                        <Progress value={headCoach.offensiveRating} className="flex-1" />
-                        <span className="text-sm font-medium">{headCoach.offensiveRating}</span>
+                        <Progress value={headCoach.offenseRating} className="flex-1" />
+                        <span className="text-sm font-medium">{headCoach.offenseRating}</span>
                       </div>
                     </div>
                     
                     <div className="space-y-2">
                       <label className="text-sm text-muted-foreground">Defensive Rating</label>
                       <div className="flex items-center space-x-2">
-                        <Progress value={headCoach.defensiveRating} className="flex-1" />
-                        <span className="text-sm font-medium">{headCoach.defensiveRating}</span>
+                        <Progress value={headCoach.defenseRating} className="flex-1" />
+                        <span className="text-sm font-medium">{headCoach.defenseRating}</span>
                       </div>
                     </div>
                   </div>
