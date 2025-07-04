@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/header";
 import { StatsCard } from "@/components/stats-card";
@@ -10,26 +11,53 @@ import { useLocation } from "wouter";
 
 export function Dashboard() {
   const [location] = useLocation();
+  const [manualTeams, setManualTeams] = useState<Team[]>([]);
+  const [manualGames, setManualGames] = useState<Game[]>([]);
+  
   const urlParams = new URLSearchParams(window.location.search);
   const selectedTeamId = urlParams.get('team');
 
-  const { data: teams } = useQuery({
+  const { data: teams, isLoading: teamsLoading } = useQuery({
     queryKey: ["/api/teams"],
   });
 
-  const { data: games } = useQuery({
+  const { data: games, isLoading: gamesLoading } = useQuery({
     queryKey: ["/api/games"],
   });
 
+  // Fallback to manual fetch if queries fail
+  useEffect(() => {
+    if (!teams && !teamsLoading) {
+      fetch('/api/teams')
+        .then(res => res.json())
+        .then(data => setManualTeams(data))
+        .catch(err => console.error('Manual teams fetch failed:', err));
+    }
+  }, [teams, teamsLoading]);
+
+  useEffect(() => {
+    if (!games && !gamesLoading) {
+      fetch('/api/games')
+        .then(res => res.json())
+        .then(data => setManualGames(data))
+        .catch(err => console.error('Manual games fetch failed:', err));
+    }
+  }, [games, gamesLoading]);
+
+  const teamsData = teams || manualTeams;
+  const gamesData = games || manualGames;
+
   // Get user's team based on URL parameter, default to first team
   const userTeam = selectedTeamId 
-    ? teams?.find((team: Team) => team.id === selectedTeamId)
-    : teams?.[0] as Team;
+    ? teamsData?.find((team: Team) => team.id === selectedTeamId)
+    : teamsData?.[0] as Team;
 
   console.log("Dashboard - Location:", location);
   console.log("Dashboard - Window Search:", window.location.search);
   console.log("Dashboard - Selected Team ID:", selectedTeamId);
   console.log("Dashboard - Teams:", teams);
+  console.log("Dashboard - Manual Teams:", manualTeams);
+  console.log("Dashboard - Combined Teams Data:", teamsData);
   console.log("Dashboard - User Team:", userTeam);
 
   // Get recent games for user's team
