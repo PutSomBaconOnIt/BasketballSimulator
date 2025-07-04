@@ -11,14 +11,28 @@ import type { Team } from "@shared/schema";
 export function TeamSelection() {
   const [, setLocation] = useLocation();
   const [selectedTeamId, setSelectedTeamId] = useState<string>("");
+  const [manualTeams, setManualTeams] = useState<Team[]>([]);
 
-  const { data: teams, isLoading } = useQuery({
+  const { data: teams, isLoading, error } = useQuery({
     queryKey: ["/api/teams"],
   });
 
-  // Remove auto-selection - user must choose
+  // Fallback to manual fetch if query fails
+  useEffect(() => {
+    if (!teams && !isLoading) {
+      console.log("Team Selection - Fetching teams manually...");
+      fetch('/api/teams')
+        .then(res => res.json())
+        .then(data => {
+          console.log("Team Selection - Manual fetch successful:", data);
+          setManualTeams(data);
+        })
+        .catch(err => console.error('Manual fetch failed:', err));
+    }
+  }, [teams, isLoading]);
 
-  const selectedTeam = teams?.find((team: Team) => team.id === selectedTeamId);
+  const teamsData = teams || manualTeams;
+  const selectedTeam = teamsData?.find((team: Team) => team.id === selectedTeamId);
 
   const handleStartWithTeam = () => {
     if (selectedTeamId) {
@@ -28,6 +42,8 @@ export function TeamSelection() {
   };
 
   console.log("Team Selection - Teams:", teams);
+  console.log("Team Selection - Manual Teams:", manualTeams);
+  console.log("Team Selection - Combined Teams Data:", teamsData);
   console.log("Team Selection - Selected Team ID:", selectedTeamId);
   console.log("Team Selection - Selected Team:", selectedTeam);
 
@@ -67,7 +83,7 @@ export function TeamSelection() {
                   <SelectValue placeholder="Choose a team to manage" />
                 </SelectTrigger>
                 <SelectContent>
-                  {teams?.map((team: Team) => (
+                  {teamsData?.map((team: Team) => (
                     <SelectItem key={team.id} value={team.id}>
                       {team.city} {team.name} ({team.wins}-{team.losses})
                     </SelectItem>
