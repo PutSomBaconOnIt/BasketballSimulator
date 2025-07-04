@@ -136,13 +136,16 @@ export function CoachingLineup() {
     const remainingAfterSixthMan = 240 - totalStarterMinutes - sixthManMinutes; // 55 minutes left
     
     // Distribute remaining minutes with role players getting more than bench players
-    const rolePlayerMinutes = 16; // Role players get more minutes
+    // Total available for bench: 240 - 160 (starters) = 80 minutes
+    const rolePlayerMinutes = 18; // Role players get more minutes
     const benchPlayerMinutes = 11; // Bench players get fewer minutes
-    const totalRoleAndBenchMinutes = (2 * rolePlayerMinutes) + (2 * benchPlayerMinutes); // 54 minutes total
+    // 6th man: 25, Role players: 36 (18x2), Bench players: 22 (11x2) = 83 total
+    // Adjust to fit exactly 80 minutes: 6th man gets 22, others stay same
+    const adjustedSixthManMinutes = 22;
     
     const newBenchMinutes = Array(10).fill(0).map((_, index) => {
-      if (index === 0) return sixthManMinutes; // 6th man gets 25 minutes
-      if (index >= 1 && index <= 2) return rolePlayerMinutes; // Role players get 16 minutes each
+      if (index === 0) return adjustedSixthManMinutes; // 6th man gets 22 minutes
+      if (index >= 1 && index <= 2) return rolePlayerMinutes; // Role players get 18 minutes each
       if (index >= 3 && index <= 4) return benchPlayerMinutes; // Bench players get 11 minutes each
       return 0; // Out of Rotation (slots 5-7) and Inactive (slots 8-9) get 0 minutes
     });
