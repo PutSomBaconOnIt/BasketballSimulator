@@ -297,55 +297,93 @@ export function CoachingLineup() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {benchList.map((player, index) => (
-              <div key={player.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                <div className="w-12 h-12 bg-secondary/50 rounded-full flex items-center justify-center">
-                  <span className="font-bold text-secondary-foreground">{player.position}</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold">{player.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {player.position} • Overall: {player.overall}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => adjustMinutes(index, false, -1)}
-                    className="w-7 h-7 p-0"
-                  >
-                    <Minus className="w-3 h-3" />
-                  </Button>
-                  <span className="w-8 text-center font-medium">{benchMinutes[index]}</span>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => adjustMinutes(index, false, 1)}
-                    className="w-7 h-7 p-0"
-                  >
-                    <Plus className="w-3 h-3" />
-                  </Button>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handlePlayerSwap(player)}
-                    className={selectedPlayer?.id === player.id ? "bg-blue-100 border-blue-300" : ""}
-                  >
-                    Move
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleViewPlayerCard(player)}
-                  >
-                    <Info className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+            {(() => {
+              const benchRoles = [
+                { slot: 0, role: "6th", label: "6th Man" },
+                { slot: 1, role: "Role", label: "Role Player" },
+                { slot: 2, role: "Role", label: "Role Player" },
+                { slot: 3, role: "Bench", label: "Bench Player" },
+                { slot: 4, role: "Bench", label: "Bench Player" },
+                { slot: 5, role: "Bench", label: "Bench Player" },
+                { slot: 6, role: "Bench", label: "Bench Player" },
+                { slot: 7, role: "Inactive", label: "Inactive" },
+                { slot: 8, role: "Inactive", label: "Inactive" },
+                { slot: 9, role: "Inactive", label: "Inactive" }
+              ];
+
+              return benchRoles.map((roleInfo) => {
+                const player = benchList[roleInfo.slot];
+                const roleColors = {
+                  "6th": "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800",
+                  "Role": "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800", 
+                  "Bench": "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800",
+                  "Inactive": "bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800"
+                };
+
+                return (
+                  <div key={roleInfo.slot} className={`flex items-center gap-4 p-4 border rounded-lg ${roleColors[roleInfo.role as keyof typeof roleColors]}`}>
+                    <div className="w-12 h-12 bg-secondary/50 rounded-full flex items-center justify-center">
+                      <span className="font-bold text-secondary-foreground text-xs">{roleInfo.role}</span>
+                    </div>
+                    <div className="flex-1">
+                      {player ? (
+                        <>
+                          <h3 className="font-semibold">{player.name}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {player.position} • Overall: {player.overall} • {roleInfo.label}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <h3 className="font-semibold text-muted-foreground">Empty Slot</h3>
+                          <p className="text-sm text-muted-foreground">{roleInfo.label}</p>
+                        </>
+                      )}
+                    </div>
+                    {player && (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => adjustMinutes(roleInfo.slot, false, -1)}
+                            className="w-7 h-7 p-0"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </Button>
+                          <span className="w-8 text-center font-medium">{benchMinutes[roleInfo.slot]}</span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => adjustMinutes(roleInfo.slot, false, 1)}
+                            className="w-7 h-7 p-0"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </Button>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handlePlayerSwap(player)}
+                            className={selectedPlayer?.id === player.id ? "bg-blue-100 border-blue-300" : ""}
+                          >
+                            Move
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleViewPlayerCard(player)}
+                          >
+                            <Info className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              });
+            })()}
           </div>
         </CardContent>
       </Card>
