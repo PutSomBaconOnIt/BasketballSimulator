@@ -19,8 +19,6 @@ function formatHeight(heightInches: number): string {
 export function PlayerDetailModal({ player, isOpen, onClose }: PlayerDetailModalProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   
-  if (!player || !isOpen) return null;
-
   const slides = [
     { title: "Personal Information", key: "personal" },
     { title: "Player Ratings", key: "ratings" }
@@ -39,7 +37,7 @@ export function PlayerDetailModal({ player, isOpen, onClose }: PlayerDetailModal
     onClose();
   };
 
-  // Handle escape key
+  // Handle escape key - always call useEffect, check condition inside
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') handleClose();
@@ -55,6 +53,9 @@ export function PlayerDetailModal({ player, isOpen, onClose }: PlayerDetailModal
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
+
+  // Early return after hooks
+  if (!player || !isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
