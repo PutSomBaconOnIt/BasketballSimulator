@@ -33,15 +33,17 @@ export function FreeAgency() {
   const [manualTeams, setManualTeams] = useState<Team[]>([]);
   const [manualPlayers, setManualPlayers] = useState<Player[]>([]);
 
+  // Use pre-loaded data from main menu with longer cache times
   const { data: teams } = useQuery({
     queryKey: ["/api/teams"],
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 10, // 10 minutes - should be pre-loaded
     refetchOnWindowFocus: false,
   });
 
-  const { data: freeAgents, isLoading } = useQuery({
-    queryKey: ["/api/players/free-agents"],
-    staleTime: 1000 * 60 * 5,
+  // Get all players and filter for free agents (more efficient than separate endpoint)
+  const { data: allPlayers, isLoading: playersLoading } = useQuery({
+    queryKey: ["/api/players"],
+    staleTime: 1000 * 60 * 10, // 10 minutes - should be pre-loaded
     refetchOnWindowFocus: false,
   });
 
@@ -51,28 +53,34 @@ export function FreeAgency() {
     refetchOnWindowFocus: false,
   });
 
-  // Immediate data fetching
+  // Only fetch manually if React Query doesn't have data (fallback)
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const teamsRes = await fetch('/api/teams');
-        const teamsData = await teamsRes.json();
-        setManualTeams(teamsData);
+        if (!teams) {
+          const teamsRes = await fetch('/api/teams');
+          const teamsData = await teamsRes.json();
+          setManualTeams(teamsData);
+        }
 
-        const playersRes = await fetch('/api/players');
-        const playersData = await playersRes.json();
-        setManualPlayers(playersData);
+        if (!allPlayers) {
+          const playersRes = await fetch('/api/players');
+          const playersData = await playersRes.json();
+          setManualPlayers(playersData);
+        }
       } catch (err) {
         console.error('Manual data fetch failed:', err);
       }
     };
     
     fetchData();
-  }, []);
+  }, [teams, allPlayers]); // Only fetch if data is missing
 
-  // Combined data
+  // Combined data with free agent filtering
   const teamsData = teams || manualTeams;
-  const playersData = freeAgents || manualPlayers?.filter(p => p.teamId === null);
+  const allPlayersData = allPlayers || manualPlayers;
+  const playersData = allPlayersData?.filter(p => p.teamId === null); // Filter for free agents
+  const isLoading = playersLoading && !allPlayersData;
   
   const userTeam = teamsData?.[0] as Team;
 

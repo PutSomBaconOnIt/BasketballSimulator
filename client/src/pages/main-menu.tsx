@@ -39,6 +39,11 @@ export function MainMenu() {
         const gamesData = await gamesRes.json();
         queryClient.setQueryData(["/api/games"], gamesData);
         
+        // Pre-fetch contract offers for free agency
+        const offersRes = await fetch('/api/contract-offers/active');
+        const offersData = await offersRes.json();
+        queryClient.setQueryData(["/api/contract-offers/active"], offersData);
+        
         console.log("Main Menu - Pre-loaded all critical data for instant navigation");
       } catch (err) {
         console.error('Pre-loading failed:', err);
