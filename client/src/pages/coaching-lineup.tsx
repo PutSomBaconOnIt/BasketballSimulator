@@ -39,12 +39,14 @@ export function CoachingLineup() {
   // Initialize lineups when players data is available
   useEffect(() => {
     if (lakersPlayers.length > 0 && startersList.length === 0) {
-      setStartersList(lakersPlayers.slice(0, 5));
-      setBenchList(lakersPlayers.slice(5));
-      console.log("Lineup - Initialized:", {
-        starters: lakersPlayers.slice(0, 5),
-        bench: lakersPlayers.slice(5)
-      });
+      const starters = lakersPlayers.slice(0, 5);
+      const bench = lakersPlayers.slice(5);
+      setStartersList(starters);
+      setBenchList(bench);
+      console.log("Lineup - Total Lakers players:", lakersPlayers.length);
+      console.log("Lineup - Starters count:", starters.length);
+      console.log("Lineup - Bench count:", bench.length);
+      console.log("Lineup - Bench players:", bench.map(p => p.name));
     }
   }, [lakersPlayers.length]);
   
@@ -180,7 +182,16 @@ export function CoachingLineup() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {benchList.map((player: Player, index: number) => (
+                {benchList.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Clock className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground mb-2">Loading Bench Players</h3>
+                    <p className="text-muted-foreground">
+                      Bench players will appear here once data is loaded.
+                    </p>
+                  </div>
+                ) : (
+                  benchList.map((player: Player, index: number) => (
                   <div key={player.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
                     selectedPlayer?.id === player.id ? 'bg-primary/20 border-2 border-primary' : 'bg-muted hover:bg-muted/70'
                   }`}>
@@ -212,7 +223,8 @@ export function CoachingLineup() {
                       </Button>
                     </div>
                   </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
