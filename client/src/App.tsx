@@ -149,10 +149,11 @@ function App() {
             )}
           </Route>
           
-          <Route component={NotFound} />
-          
-          <Toaster />
+          <Route>
+            {(params) => <NotFound />}
+          </Route>
         </Router>
+        <Toaster />
       </div>
     </QueryClientProvider>
   );
