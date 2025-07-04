@@ -172,24 +172,24 @@ export function CoachingLineup() {
                   <div key={player.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
                     selectedPlayer?.id === player.id ? 'bg-primary/20 border-2 border-primary' : 'bg-muted hover:bg-muted/70'
                   }`}>
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 flex-1">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleViewPlayerCard(player)}
-                        className="w-8 h-8 p-0 hover:bg-primary/20 rounded-full"
+                        className="w-8 h-8 p-0 hover:bg-primary/20 rounded-full flex-shrink-0"
                       >
                         <Info className="w-4 h-4 text-muted-foreground hover:text-primary" />
                       </Button>
-                      <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
                         <span className="text-primary font-semibold text-sm">{player.jerseyNumber}</span>
                       </div>
-                      <div>
-                        <div className="text-foreground font-medium">{player.name}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-foreground font-medium truncate">{player.name}</div>
                         <div className="text-xs text-muted-foreground">{player.position} • OVR {player.overall}</div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1 flex-shrink-0">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -256,7 +256,7 @@ export function CoachingLineup() {
                     }`}
                     onClick={() => handlePlayerSwap(player)}
                   >
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 flex-1">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -264,19 +264,19 @@ export function CoachingLineup() {
                           e.stopPropagation();
                           handleViewPlayerCard(player);
                         }}
-                        className="w-8 h-8 p-0 hover:bg-primary/20 rounded-full"
+                        className="w-8 h-8 p-0 hover:bg-primary/20 rounded-full flex-shrink-0"
                       >
                         <Info className="w-4 h-4 text-muted-foreground hover:text-primary" />
                       </Button>
-                      <div className="w-8 h-8 bg-secondary/20 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-secondary/20 rounded-full flex items-center justify-center flex-shrink-0">
                         <span className="text-secondary font-semibold text-sm">{player.jerseyNumber}</span>
                       </div>
-                      <div>
-                        <div className="text-foreground font-medium">{player.name}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-foreground font-medium truncate">{player.name}</div>
                         <div className="text-xs text-muted-foreground">{player.position} • OVR {player.overall}</div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1 flex-shrink-0">
                       <Button
                         variant="ghost"
                         size="sm"
