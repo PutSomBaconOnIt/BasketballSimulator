@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Users, Trophy, TrendingUp, DollarSign } from "lucide-react";
 import type { Team } from "@shared/schema";
 
@@ -15,15 +16,7 @@ export function TeamSelection() {
     queryKey: ["/api/teams"],
   });
 
-  // Auto-select Lakers when teams load
-  useEffect(() => {
-    if (teams && !selectedTeamId) {
-      const lakersTeam = teams.find((team: Team) => team.name === "Lakers");
-      if (lakersTeam) {
-        setSelectedTeamId(lakersTeam.id);
-      }
-    }
-  }, [teams, selectedTeamId]);
+  // Remove auto-selection - user must choose
 
   const selectedTeam = teams?.find((team: Team) => team.id === selectedTeamId);
 
@@ -59,91 +52,68 @@ export function TeamSelection() {
             <ArrowLeft className="w-5 h-5 mr-2" />
             Back to Main Menu
           </Button>
-          <h1 className="text-4xl font-bold">Start Managing the Lakers</h1>
+          <h1 className="text-4xl font-bold">Choose Your Team</h1>
         </div>
 
         {/* Team Selection */}
-        <div className="max-w-2xl mx-auto mb-8">
-          {teams?.filter((team: Team) => team.name === "Lakers").map((team: Team) => (
-            <Card 
-              key={team.id}
-              className={`bg-slate-800/80 border-2 cursor-pointer transition-all hover:bg-slate-700/80 ${
-                selectedTeamId === team.id 
-                  ? 'border-green-500 bg-slate-700/80' 
-                  : 'border-slate-700'
-              }`}
-              onClick={() => setSelectedTeamId(team.id)}
-            >
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="text-2xl">{team.city} {team.name}</span>
-                  <Badge variant="secondary">{team.conference}</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center">
-                    <Trophy className="w-5 h-5 mr-2 text-yellow-500" />
-                    <span>{team.wins}-{team.losses}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <TrendingUp className="w-5 h-5 mr-2 text-blue-500" />
-                    <span>{team.overallRating} Overall</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Users className="w-5 h-5 mr-2 text-green-500" />
-                    <span>{team.teamMorale} Morale</span>
-                  </div>
-                  <div className="flex items-center">
-                    <DollarSign className="w-5 h-5 mr-2 text-orange-500" />
-                    <span>${(team.currentSalary / 1000000).toFixed(1)}M</span>
-                  </div>
-                </div>
-                <div className="mt-4 text-sm text-slate-400">
-                  <p>Offense: {team.offenseRating} | Defense: {team.defenseRating}</p>
-                  <p>Avg Points: {team.avgPointsPerGame} | Allowed: {team.avgPointsAllowed}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Selected Team Info & Action */}
-        {selectedTeam && (
-          <Card className="bg-slate-800/80 border-slate-700 mb-8">
+        <div className="max-w-md mx-auto mb-8">
+          <Card className="bg-slate-800/80 border-slate-700">
             <CardHeader>
-              <CardTitle className="text-2xl text-center">
-                Ready to manage the {selectedTeam.city} {selectedTeam.name}?
-              </CardTitle>
+              <CardTitle className="text-xl text-center">Select Your Team</CardTitle>
             </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-slate-300 mb-6">
-                Take control of this {selectedTeam.overallRating}-rated team with a {selectedTeam.wins}-{selectedTeam.losses} record. 
-                Lead them to championship glory!
-              </p>
+            <CardContent className="space-y-6">
+              <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Choose a team to manage" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teams?.map((team: Team) => (
+                    <SelectItem key={team.id} value={team.id}>
+                      {team.city} {team.name} ({team.wins}-{team.losses})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
               <Button 
-                size="lg"
-                className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold px-8 py-3 text-lg"
+                className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 text-lg"
+                disabled={!selectedTeamId}
                 onClick={handleStartWithTeam}
               >
                 Start Managing This Team
               </Button>
             </CardContent>
           </Card>
-        )}
+        </div>
 
-        {/* Instructions */}
-        <Card className="bg-slate-800/80 border-slate-700">
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-3">How to Choose:</h3>
-            <ul className="text-slate-300 space-y-2">
-              <li>• Click on a team card to select it</li>
-              <li>• Review team stats including wins/losses, ratings, and salary</li>
-              <li>• Higher overall rating means better players but greater expectations</li>
-              <li>• Lower rated teams offer more room for improvement and development</li>
-            </ul>
-          </CardContent>
-        </Card>
+        {/* Selected Team Info */}
+        {selectedTeam && (
+          <Card className="bg-slate-800/80 border-slate-700 max-w-md mx-auto">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-semibold mb-4 text-center">
+                {selectedTeam.city} {selectedTeam.name}
+              </h3>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="flex items-center">
+                  <Trophy className="w-4 h-4 mr-2 text-yellow-500" />
+                  <span>{selectedTeam.wins}-{selectedTeam.losses}</span>
+                </div>
+                <div className="flex items-center">
+                  <TrendingUp className="w-4 h-4 mr-2 text-blue-500" />
+                  <span>{selectedTeam.overallRating} Overall</span>
+                </div>
+                <div className="flex items-center">
+                  <Users className="w-4 h-4 mr-2 text-green-500" />
+                  <span>{selectedTeam.teamMorale} Morale</span>
+                </div>
+                <div className="flex items-center">
+                  <DollarSign className="w-4 h-4 mr-2 text-orange-500" />
+                  <span>${(selectedTeam.currentSalary / 1000000).toFixed(1)}M</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
