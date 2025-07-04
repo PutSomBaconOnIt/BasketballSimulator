@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Target, Clock, ArrowLeft, ArrowUp, Info } from "lucide-react";
+import { Target, Clock, ArrowLeft, ArrowUp, Info, Plus, Minus } from "lucide-react";
 import { Link } from "wouter";
 import type { Player } from "@shared/schema";
 import { PlayerDetailModal } from "@/components/player-detail-modal";
@@ -14,6 +14,8 @@ export function CoachingLineup() {
   const [manualPlayers, setManualPlayers] = useState<Player[]>([]);
   const [modalPlayer, setModalPlayer] = useState<Player | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [starterMinutes, setStarterMinutes] = useState<number[]>([32, 35, 30, 36, 34]);
+  const [benchMinutes, setBenchMinutes] = useState<number[]>([18, 15, 12, 8, 10, 5, 3, 7, 2, 6]);
   
   const { data: players } = useQuery({
     queryKey: ["/api/players"],
@@ -53,11 +55,7 @@ export function CoachingLineup() {
     }
   }, [lakersPlayers.length]);
   
-  // Define starting lineup with realistic minutes (32-38 minutes)
-  const starterMinutes = [36, 34, 32, 35, 33]; // Realistic starter minutes
-  
-  // Define bench players with realistic minutes (8-20 minutes)
-  const benchMinutes = [18, 15, 12, 8, 10, 6, 8, 5, 4, 2]; // Realistic bench minutes
+
 
   const handlePlayerSwap = (player: Player) => {
     if (!selectedPlayer) {
@@ -108,6 +106,20 @@ export function CoachingLineup() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setModalPlayer(null);
+  };
+
+  const adjustStarterMinutes = (index: number, change: number) => {
+    const newMinutes = [...starterMinutes];
+    const newValue = Math.max(0, Math.min(48, newMinutes[index] + change));
+    newMinutes[index] = newValue;
+    setStarterMinutes(newMinutes);
+  };
+
+  const adjustBenchMinutes = (index: number, change: number) => {
+    const newMinutes = [...benchMinutes];
+    const newValue = Math.max(0, Math.min(48, newMinutes[index] + change));
+    newMinutes[index] = newValue;
+    setBenchMinutes(newMinutes);
   };
 
   return (
@@ -178,13 +190,34 @@ export function CoachingLineup() {
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => adjustStarterMinutes(index, -1)}
+                        className="w-6 h-6 p-0 hover:bg-red-500/20 rounded"
+                      >
+                        <Minus className="w-3 h-3 text-red-500" />
+                      </Button>
                       <input 
                         type="number" 
-                        defaultValue={starterMinutes[index] || 32}
+                        value={starterMinutes[index] || 32}
+                        onChange={(e) => {
+                          const newMinutes = [...starterMinutes];
+                          newMinutes[index] = Math.max(0, Math.min(48, parseInt(e.target.value) || 0));
+                          setStarterMinutes(newMinutes);
+                        }}
                         min="0" 
                         max="48" 
-                        className="w-16 px-2 py-1 text-sm bg-background border border-border rounded focus:ring-2 focus:ring-primary"
+                        className="w-12 px-1 py-1 text-xs text-center bg-background border border-border rounded focus:ring-2 focus:ring-primary"
                       />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => adjustStarterMinutes(index, 1)}
+                        className="w-6 h-6 p-0 hover:bg-green-500/20 rounded"
+                      >
+                        <Plus className="w-3 h-3 text-green-500" />
+                      </Button>
                       <span className="text-xs text-muted-foreground">min</span>
                     </div>
                   </div>
@@ -244,14 +277,41 @@ export function CoachingLineup() {
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          adjustBenchMinutes(index, -1);
+                        }}
+                        className="w-6 h-6 p-0 hover:bg-red-500/20 rounded"
+                      >
+                        <Minus className="w-3 h-3 text-red-500" />
+                      </Button>
                       <input 
                         type="number" 
-                        defaultValue={benchMinutes[index] || 10}
+                        value={benchMinutes[index] || 10}
+                        onChange={(e) => {
+                          const newMinutes = [...benchMinutes];
+                          newMinutes[index] = Math.max(0, Math.min(48, parseInt(e.target.value) || 0));
+                          setBenchMinutes(newMinutes);
+                        }}
                         min="0" 
                         max="48" 
-                        className="w-16 px-2 py-1 text-sm bg-background border border-border rounded focus:ring-2 focus:ring-primary"
+                        className="w-12 px-1 py-1 text-xs text-center bg-background border border-border rounded focus:ring-2 focus:ring-primary"
                         onClick={(e) => e.stopPropagation()}
                       />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          adjustBenchMinutes(index, 1);
+                        }}
+                        className="w-6 h-6 p-0 hover:bg-green-500/20 rounded"
+                      >
+                        <Plus className="w-3 h-3 text-green-500" />
+                      </Button>
                       <span className="text-xs text-muted-foreground">min</span>
                     </div>
                   </div>
