@@ -545,16 +545,25 @@ export function CoachingLineup() {
           </Card>
         </div>
 
-        {/* Lineup Summary */}
+        {/* Minutes Summary & Controls */}
         <div className="mt-8">
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-foreground">Lineup Summary</CardTitle>
+              <CardTitle className="text-foreground flex items-center justify-between">
+                <span>Minutes Summary</span>
+                <Button 
+                  onClick={allocateBenchMinutes}
+                  className="bg-primary hover:bg-primary/90 text-sm"
+                >
+                  <Target className="w-4 h-4 mr-2" />
+                  Auto-Adjust Minutes
+                </Button>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div className="text-center">
-                  <div className={`text-2xl font-bold ${
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="text-center p-4 bg-muted/30 rounded-lg">
+                  <div className={`text-3xl font-bold mb-1 ${
                     240 - (starterMinutes.reduce((a, b) => a + b, 0) + 
                            benchMinutes.slice(0, benchList.length).reduce((a, b) => a + b, 0)) >= 0 
                     ? 'text-green-500' : 'text-red-500'
@@ -562,36 +571,36 @@ export function CoachingLineup() {
                     {240 - (starterMinutes.reduce((a, b) => a + b, 0) + 
                             benchMinutes.slice(0, benchList.length).reduce((a, b) => a + b, 0))}
                   </div>
-                  <div className="text-sm text-muted-foreground">Minutes Remaining</div>
+                  <div className="text-sm font-medium text-muted-foreground">Minutes Remaining</div>
+                  <div className="text-xs text-muted-foreground mt-1">of 240 total</div>
                 </div>
                 
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-500">{startersList.length}</div>
-                  <div className="text-sm text-muted-foreground">Starters</div>
+                <div className="text-center p-4 bg-green-500/10 rounded-lg">
+                  <div className="text-3xl font-bold text-green-500 mb-1">{startersList.length}</div>
+                  <div className="text-sm font-medium text-muted-foreground">Starters</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {starterMinutes.reduce((a, b) => a + b, 0)} min total
+                  </div>
                 </div>
                 
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-500">{benchList.length}</div>
-                  <div className="text-sm text-muted-foreground">Bench Players</div>
+                <div className="text-center p-4 bg-blue-500/10 rounded-lg">
+                  <div className="text-3xl font-bold text-blue-500 mb-1">{benchList.length}</div>
+                  <div className="text-sm font-medium text-muted-foreground">Bench Players</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {benchMinutes.slice(0, benchList.length).reduce((a, b) => a + b, 0)} min total
+                  </div>
                 </div>
                 
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-500">
+                <div className="text-center p-4 bg-orange-500/10 rounded-lg">
+                  <div className="text-3xl font-bold text-orange-500 mb-1">
                     {Math.round(((starterMinutes.reduce((a, b) => a + b, 0) + 
                                  benchMinutes.slice(0, benchList.length).reduce((a, b) => a + b, 0)) / 240) * 100)}%
                   </div>
-                  <div className="text-sm text-muted-foreground">Rotation Usage</div>
+                  <div className="text-sm font-medium text-muted-foreground">Usage</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {starterMinutes.reduce((a, b) => a + b, 0) + benchMinutes.slice(0, benchList.length).reduce((a, b) => a + b, 0)}/240 min
+                  </div>
                 </div>
-              </div>
-              
-              <div className="mt-6 flex justify-center">
-                <Button 
-                  onClick={allocateBenchMinutes}
-                  className="bg-primary hover:bg-primary/90"
-                >
-                  <Target className="w-4 h-4 mr-2" />
-                  Auto-Adjust
-                </Button>
               </div>
             </CardContent>
           </Card>
