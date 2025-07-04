@@ -21,9 +21,11 @@ import type { Team } from "@shared/schema";
 export function MainMenu() {
   const [selectedTeamId, setSelectedTeamId] = useState<string>("");
 
-  const { data: teams } = useQuery({
+  const { data: teams, isLoading, error } = useQuery({
     queryKey: ["/api/teams"],
   });
+
+  console.log("Teams data:", teams, "Loading:", isLoading, "Error:", error);
 
   const selectedTeam = teams?.find((team: Team) => team.id === selectedTeamId);
 
@@ -58,21 +60,24 @@ export function MainMenu() {
             {/* Team Selection */}
             <div className="space-y-4">
               <div className="text-center">
-                <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
-                  <SelectTrigger className="w-full max-w-md mx-auto bg-slate-700 border-slate-600 text-white">
-                    <SelectValue placeholder="Select your team to manage..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {teams?.map((team: Team) => (
-                      <SelectItem key={team.id} value={team.id}>
-                        <div className="flex items-center space-x-3">
-                          <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"></div>
-                          <span>{team.city} {team.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="max-w-md mx-auto">
+                  <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
+                    <SelectTrigger className="w-full bg-slate-700 border-slate-600 text-white">
+                      <SelectValue placeholder="Select your team to manage..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-600">
+                      {teams?.map((team: Team) => (
+                        <SelectItem 
+                          key={team.id} 
+                          value={team.id} 
+                          className="text-white hover:bg-slate-600 focus:bg-slate-600 focus:text-white"
+                        >
+                          {team.city} {team.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {/* Selected Team Info */}
