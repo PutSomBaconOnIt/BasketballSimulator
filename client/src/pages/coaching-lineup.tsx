@@ -15,7 +15,7 @@ export function CoachingLineup() {
   const [modalPlayer, setModalPlayer] = useState<Player | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [starterMinutes, setStarterMinutes] = useState<number[]>([32, 35, 30, 36, 34]);
-  const [benchMinutes, setBenchMinutes] = useState<number[]>([18, 15, 12, 8, 10, 5, 3, 7, 2, 6]);
+  const [benchMinutes, setBenchMinutes] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
   
   const { data: players } = useQuery({
     queryKey: ["/api/players"],
@@ -290,7 +290,7 @@ export function CoachingLineup() {
                       </Button>
                       <input 
                         type="number" 
-                        value={benchMinutes[index] || 10}
+                        value={benchMinutes[index] || 0}
                         onChange={(e) => {
                           const newMinutes = [...benchMinutes];
                           newMinutes[index] = Math.max(0, Math.min(48, parseInt(e.target.value) || 0));
