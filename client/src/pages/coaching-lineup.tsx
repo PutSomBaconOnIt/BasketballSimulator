@@ -64,7 +64,16 @@ export function CoachingLineup() {
           if (index > -1) remainingPlayers.splice(index, 1);
         }
 
-        const bench = remainingPlayers;
+        // Sort bench players by overall rating (best first) and organize by role priority
+        const sortedBenchPlayers = remainingPlayers.sort((a, b) => b.overall - a.overall);
+        
+        // Create a 10-slot bench array, with better players in active slots (0-6) and lower overall in inactive (7-9)
+        const bench = Array(10).fill(null);
+        sortedBenchPlayers.forEach((player, index) => {
+          if (index < 10) {
+            bench[index] = player;
+          }
+        });
 
         console.log("Lineup - Starters:", starters);
         console.log("Lineup - Bench:", bench);
@@ -116,13 +125,20 @@ export function CoachingLineup() {
   const remainingMinutes = 240 - totalMinutes;
 
   const autoAdjustMinutes = () => {
-    // Simple auto-adjustment: give starters 32 minutes each, distribute rest to bench
+    // Auto-adjust: starters get 32 minutes each, distribute remaining to active bench players
     const newStarterMinutes = [32, 32, 32, 32, 32];
-    const remainingForBench = 240 - 160; // 80 minutes for bench
-    const benchCount = benchList.length;
-    const minutesPerBench = benchCount > 0 ? Math.floor(remainingForBench / benchCount) : 0;
+    const totalStarterMinutes = 160;
+    const remainingMinutes = 240 - totalStarterMinutes; // 80 minutes for bench
     
-    const newBenchMinutes = benchList.map(() => minutesPerBench);
+    // Only active bench players get minutes (slots 0-6: 6th man, role players, bench players)
+    // Inactive slots (7-9) get 0 minutes
+    const activeBenchSlots = 7; // Slots 0-6 are active
+    const minutesPerActiveBench = activeBenchSlots > 0 ? Math.floor(remainingMinutes / activeBenchSlots) : 0;
+    
+    const newBenchMinutes = Array(10).fill(0).map((_, index) => {
+      // Slots 0-6 get minutes, slots 7-9 (inactive) get 0
+      return index < 7 ? minutesPerActiveBench : 0;
+    });
     
     setStarterMinutes(newStarterMinutes);
     setBenchMinutes(newBenchMinutes);
