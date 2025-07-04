@@ -153,7 +153,7 @@ export function CoachingLineup() {
                       </div>
                       <div>
                         <div className="text-foreground font-medium">{player.name}</div>
-                        <div className="text-xs text-muted-foreground">{player.position}</div>
+                        <div className="text-xs text-muted-foreground">{player.position} • OVR {player.overall}</div>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -208,7 +208,7 @@ export function CoachingLineup() {
                       </div>
                       <div>
                         <div className="text-foreground font-medium">{player.name}</div>
-                        <div className="text-xs text-muted-foreground">{player.position}</div>
+                        <div className="text-xs text-muted-foreground">{player.position} • OVR {player.overall}</div>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
