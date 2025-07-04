@@ -142,7 +142,7 @@ export function CoachingLineup() {
     const newBenchMinutes = Array(10).fill(0).map((_, index) => {
       if (index === 0) return sixthManMinutes; // 6th man gets 25 minutes
       if (index >= 1 && index <= 4) return minutesPerRoleAndBench; // Role players and bench get equal shares
-      return 0; // DNP (slots 5-7) and Inactive (slots 8-9) get 0 minutes
+      return 0; // Out of Rotation (slots 5-7) and Inactive (slots 8-9) get 0 minutes
     });
     
     setStarterMinutes(newStarterMinutes);
@@ -325,9 +325,9 @@ export function CoachingLineup() {
                 { slot: 2, role: "Role", label: "Role Player" },
                 { slot: 3, role: "Bench", label: "Bench Player" },
                 { slot: 4, role: "Bench", label: "Bench Player" },
-                { slot: 5, role: "DNP", label: "Did Not Play" },
-                { slot: 6, role: "DNP", label: "Did Not Play" },
-                { slot: 7, role: "DNP", label: "Did Not Play" },
+                { slot: 5, role: "DNP", label: "Out of Rotation" },
+                { slot: 6, role: "DNP", label: "Out of Rotation" },
+                { slot: 7, role: "DNP", label: "Out of Rotation" },
                 { slot: 8, role: "Inactive", label: "Inactive" },
                 { slot: 9, role: "Inactive", label: "Inactive" }
               ];
