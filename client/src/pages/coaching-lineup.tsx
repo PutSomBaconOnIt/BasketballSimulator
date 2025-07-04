@@ -1,25 +1,75 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Target, Clock, ArrowLeft } from "lucide-react";
+import { Target, Clock, ArrowLeft, X } from "lucide-react";
 import { Link } from "wouter";
 import type { Player } from "@shared/schema";
 
 export function CoachingLineup() {
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [startersList, setStartersList] = useState<Player[]>([]);
+  const [benchList, setBenchList] = useState<Player[]>([]);
+  
   const { data: players } = useQuery({
     queryKey: ["/api/players"],
   });
 
-  // Get Lakers players (assuming first team is Lakers)
+  // Initialize lineups when players data is available
   const lakersPlayers = players?.filter((p: Player) => p.teamId) || [];
   
+  // Only set initial lineup if not already set
+  if (lakersPlayers.length > 0 && startersList.length === 0) {
+    setStartersList(lakersPlayers.slice(0, 5));
+    setBenchList(lakersPlayers.slice(5));
+  }
+  
   // Define starting lineup with realistic minutes (32-38 minutes)
-  const starters = lakersPlayers.slice(0, 5);
   const starterMinutes = [36, 34, 32, 35, 33]; // Realistic starter minutes
   
   // Define bench players with realistic minutes (8-20 minutes)
-  const bench = lakersPlayers.slice(5);
   const benchMinutes = [18, 15, 12, 8, 10, 6, 8, 5, 4, 2]; // Realistic bench minutes
+
+  const handlePlayerSwap = (player: Player) => {
+    if (!selectedPlayer) {
+      setSelectedPlayer(player);
+      return;
+    }
+
+    // Find which list each player is in
+    const selectedIsStarter = startersList.some(p => p.id === selectedPlayer.id);
+    const targetIsStarter = startersList.some(p => p.id === player.id);
+
+    if (selectedIsStarter && !targetIsStarter) {
+      // Swap starter with bench player
+      const newStarters = startersList.map(p => p.id === selectedPlayer.id ? player : p);
+      const newBench = benchList.map(p => p.id === player.id ? selectedPlayer : p);
+      setStartersList(newStarters);
+      setBenchList(newBench);
+    } else if (!selectedIsStarter && targetIsStarter) {
+      // Swap bench player with starter
+      const newStarters = startersList.map(p => p.id === player.id ? selectedPlayer : p);
+      const newBench = benchList.map(p => p.id === selectedPlayer.id ? player : p);
+      setStartersList(newStarters);
+      setBenchList(newBench);
+    } else if (selectedIsStarter && targetIsStarter) {
+      // Swap two starters
+      const selectedIndex = startersList.findIndex(p => p.id === selectedPlayer.id);
+      const targetIndex = startersList.findIndex(p => p.id === player.id);
+      const newStarters = [...startersList];
+      [newStarters[selectedIndex], newStarters[targetIndex]] = [newStarters[targetIndex], newStarters[selectedIndex]];
+      setStartersList(newStarters);
+    } else if (!selectedIsStarter && !targetIsStarter) {
+      // Swap two bench players
+      const selectedIndex = benchList.findIndex(p => p.id === selectedPlayer.id);
+      const targetIndex = benchList.findIndex(p => p.id === player.id);
+      const newBench = [...benchList];
+      [newBench[selectedIndex], newBench[targetIndex]] = [newBench[targetIndex], newBench[selectedIndex]];
+      setBenchList(newBench);
+    }
+
+    setSelectedPlayer(null);
+  };
 
   return (
     <div className="flex-1 flex flex-col">
@@ -46,6 +96,16 @@ export function CoachingLineup() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-6">
+        {/* Instructions */}
+        {selectedPlayer && (
+          <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-lg">
+            <p className="text-sm text-foreground">
+              <span className="font-medium">{selectedPlayer.name}</span> is selected. 
+              Click the <X className="inline w-3 h-3 mx-1 transform rotate-45" /> button next to another player to swap positions.
+            </p>
+          </div>
+        )}
+        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Starting Lineup */}
           <Card className="bg-card border-border">
@@ -57,8 +117,10 @@ export function CoachingLineup() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {starters.map((player: Player, index: number) => (
-                  <div key={player.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                {startersList.map((player: Player, index: number) => (
+                  <div key={player.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                    selectedPlayer?.id === player.id ? 'bg-primary/20 border-2 border-primary' : 'bg-muted hover:bg-muted/70'
+                  }`}>
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
                         <span className="text-primary font-semibold text-sm">{player.jerseyNumber}</span>
@@ -77,6 +139,14 @@ export function CoachingLineup() {
                         className="w-16 px-2 py-1 text-sm bg-background border border-border rounded focus:ring-2 focus:ring-primary"
                       />
                       <span className="text-xs text-muted-foreground">min</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handlePlayerSwap(player)}
+                        className="w-8 h-8 p-0 ml-2 hover:bg-primary/20 rounded-full"
+                      >
+                        <X className="w-4 h-4 text-muted-foreground hover:text-primary transform rotate-45" />
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -94,8 +164,10 @@ export function CoachingLineup() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {bench.map((player: Player, index: number) => (
-                  <div key={player.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                {benchList.map((player: Player, index: number) => (
+                  <div key={player.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                    selectedPlayer?.id === player.id ? 'bg-primary/20 border-2 border-primary' : 'bg-muted hover:bg-muted/70'
+                  }`}>
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 bg-secondary/20 rounded-full flex items-center justify-center">
                         <span className="text-secondary font-semibold text-sm">{player.jerseyNumber}</span>
@@ -114,6 +186,14 @@ export function CoachingLineup() {
                         className="w-16 px-2 py-1 text-sm bg-background border border-border rounded focus:ring-2 focus:ring-primary"
                       />
                       <span className="text-xs text-muted-foreground">min</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handlePlayerSwap(player)}
+                        className="w-8 h-8 p-0 ml-2 hover:bg-primary/20 rounded-full"
+                      >
+                        <X className="w-4 h-4 text-muted-foreground hover:text-primary transform rotate-45" />
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -133,25 +213,25 @@ export function CoachingLineup() {
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary">
                     {starterMinutes.reduce((a, b) => a + b, 0) + 
-                     benchMinutes.slice(0, bench.length).reduce((a, b) => a + b, 0)}
+                     benchMinutes.slice(0, benchList.length).reduce((a, b) => a + b, 0)}
                   </div>
                   <div className="text-sm text-muted-foreground">Total Minutes</div>
                 </div>
                 
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-500">{starters.length}</div>
+                  <div className="text-2xl font-bold text-green-500">{startersList.length}</div>
                   <div className="text-sm text-muted-foreground">Starters</div>
                 </div>
                 
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-500">{bench.length}</div>
+                  <div className="text-2xl font-bold text-blue-500">{benchList.length}</div>
                   <div className="text-sm text-muted-foreground">Bench Players</div>
                 </div>
                 
                 <div className="text-center">
                   <div className="text-2xl font-bold text-orange-500">
                     {Math.round(((starterMinutes.reduce((a, b) => a + b, 0) + 
-                                 benchMinutes.slice(0, bench.length).reduce((a, b) => a + b, 0)) / 240) * 100)}%
+                                 benchMinutes.slice(0, benchList.length).reduce((a, b) => a + b, 0)) / 240) * 100)}%
                   </div>
                   <div className="text-sm text-muted-foreground">Rotation Usage</div>
                 </div>
