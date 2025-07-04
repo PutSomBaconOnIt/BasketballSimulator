@@ -20,6 +20,8 @@ function formatHeight(heightInches: number): string {
 export function PlayerDetailModal({ player, isOpen, onClose }: PlayerDetailModalProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   
+  console.log('PlayerDetailModal render:', { player: player?.name, isOpen });
+  
   if (!player) return null;
 
   const slides = [
