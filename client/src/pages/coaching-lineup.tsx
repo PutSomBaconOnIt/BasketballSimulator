@@ -18,6 +18,25 @@ export function CoachingLineup() {
   const [starterMinutes, setStarterMinutes] = useState<number[]>([32, 35, 30, 36, 34]);
   const [benchMinutes, setBenchMinutes] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
+  // Simplified early return to test if component loads
+  if (startersList.length === 0) {
+    return (
+      <div className="min-h-screen bg-background p-6">
+        <div className="mb-6">
+          <Link to="/coaching">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Coaching
+            </Button>
+          </Link>
+        </div>
+        
+        <h1 className="text-3xl font-bold text-foreground mb-4">Coaching Lineup (Loading...)</h1>
+        <p className="text-muted-foreground">Loading player data...</p>
+      </div>
+    );
+  }
+
   // Smart minute allocation based on position matching and overall rating
   const allocateBenchMinutes = () => {
     const newBenchMinutes = Array(benchList.length).fill(0);

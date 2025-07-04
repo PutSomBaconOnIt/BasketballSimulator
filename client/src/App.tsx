@@ -68,7 +68,7 @@ function App() {
           <Route path="/coaching/lineup">
             {() => (
               <div className="h-screen overflow-hidden bg-background">
-                <CoachingLineupTest />
+                <CoachingLineup />
               </div>
             )}
           </Route>
