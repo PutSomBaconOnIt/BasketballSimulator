@@ -32,7 +32,10 @@ export function CoachingLineup() {
   // Process players data once loaded
   useEffect(() => {
     if (playersData && Array.isArray(playersData)) {
-      const lakersPlayers = playersData.filter((p: Player) => p.teamId === "qDj7kCzyDMFC7EH393Trp");
+      // Filter Lakers players (players with teamId)
+      const lakersPlayers = playersData.filter((p: Player) => p.teamId && p.teamId !== null);
+      
+      console.log("Lineup - Lakers players:", lakersPlayers);
       
       if (lakersPlayers.length > 0) {
         // Sort by position priority for starting lineup
@@ -47,6 +50,9 @@ export function CoachingLineup() {
         // Set starters (top 5 players by position)
         const starters = sortedPlayers.slice(0, 5);
         const bench = sortedPlayers.slice(5);
+
+        console.log("Lineup - Starters:", starters);
+        console.log("Lineup - Bench:", bench);
 
         setStartersList(starters);
         setBenchList(bench);
