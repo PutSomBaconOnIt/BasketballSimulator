@@ -405,9 +405,9 @@ export function CoachingLineup() {
                         variant="ghost"
                         size="sm"
                         onClick={() => adjustStarterMinutes(index, -1)}
-                        className="w-5 h-5 p-0 hover:bg-red-500/20 rounded"
+                        className="w-7 h-7 p-0 hover:bg-red-500/20 rounded"
                       >
-                        <Minus className="w-2.5 h-2.5 text-red-500" />
+                        <Minus className="w-3.5 h-3.5 text-red-500" />
                       </Button>
                       <input 
                         type="number" 
@@ -431,9 +431,9 @@ export function CoachingLineup() {
                         variant="ghost"
                         size="sm"
                         onClick={() => adjustStarterMinutes(index, 1)}
-                        className="w-5 h-5 p-0 hover:bg-green-500/20 rounded"
+                        className="w-7 h-7 p-0 hover:bg-green-500/20 rounded"
                       >
-                        <Plus className="w-2.5 h-2.5 text-green-500" />
+                        <Plus className="w-3.5 h-3.5 text-green-500" />
                       </Button>
                       <span className="text-xs text-muted-foreground ml-1">min</span>
                     </div>
@@ -501,9 +501,9 @@ export function CoachingLineup() {
                           e.stopPropagation();
                           adjustBenchMinutes(index, -1);
                         }}
-                        className="w-5 h-5 p-0 hover:bg-red-500/20 rounded"
+                        className="w-7 h-7 p-0 hover:bg-red-500/20 rounded"
                       >
-                        <Minus className="w-2.5 h-2.5 text-red-500" />
+                        <Minus className="w-3.5 h-3.5 text-red-500" />
                       </Button>
                       <input 
                         type="number" 
@@ -531,9 +531,9 @@ export function CoachingLineup() {
                           e.stopPropagation();
                           adjustBenchMinutes(index, 1);
                         }}
-                        className="w-5 h-5 p-0 hover:bg-green-500/20 rounded"
+                        className="w-7 h-7 p-0 hover:bg-green-500/20 rounded"
                       >
-                        <Plus className="w-2.5 h-2.5 text-green-500" />
+                        <Plus className="w-3.5 h-3.5 text-green-500" />
                       </Button>
                       <span className="text-xs text-muted-foreground ml-1">min</span>
                     </div>
