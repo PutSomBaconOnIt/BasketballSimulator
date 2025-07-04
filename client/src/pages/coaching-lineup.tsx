@@ -2,15 +2,18 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Target, Clock, ArrowLeft, ArrowUp } from "lucide-react";
+import { Target, Clock, ArrowLeft, ArrowUp, Info } from "lucide-react";
 import { Link } from "wouter";
 import type { Player } from "@shared/schema";
+import { PlayerDetailModal } from "@/components/player-detail-modal";
 
 export function CoachingLineup() {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [startersList, setStartersList] = useState<Player[]>([]);
   const [benchList, setBenchList] = useState<Player[]>([]);
   const [manualPlayers, setManualPlayers] = useState<Player[]>([]);
+  const [modalPlayer, setModalPlayer] = useState<Player | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   const { data: players } = useQuery({
     queryKey: ["/api/players"],
@@ -97,6 +100,16 @@ export function CoachingLineup() {
     setSelectedPlayer(null);
   };
 
+  const handleViewPlayerCard = (player: Player) => {
+    setModalPlayer(player);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setModalPlayer(null);
+  };
+
   return (
     <div className="flex-1 flex flex-col">
       <div className="bg-card border-b border-border p-6">
@@ -148,6 +161,14 @@ export function CoachingLineup() {
                     selectedPlayer?.id === player.id ? 'bg-primary/20 border-2 border-primary' : 'bg-muted hover:bg-muted/70'
                   }`}>
                     <div className="flex items-center space-x-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleViewPlayerCard(player)}
+                        className="w-8 h-8 p-0 hover:bg-primary/20 rounded-full"
+                      >
+                        <Info className="w-4 h-4 text-muted-foreground hover:text-primary" />
+                      </Button>
                       <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
                         <span className="text-primary font-semibold text-sm">{player.jerseyNumber}</span>
                       </div>
@@ -203,6 +224,17 @@ export function CoachingLineup() {
                     onClick={() => handlePlayerSwap(player)}
                   >
                     <div className="flex items-center space-x-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewPlayerCard(player);
+                        }}
+                        className="w-8 h-8 p-0 hover:bg-primary/20 rounded-full"
+                      >
+                        <Info className="w-4 h-4 text-muted-foreground hover:text-primary" />
+                      </Button>
                       <div className="w-8 h-8 bg-secondary/20 rounded-full flex items-center justify-center">
                         <span className="text-secondary font-semibold text-sm">{player.jerseyNumber}</span>
                       </div>
@@ -268,6 +300,13 @@ export function CoachingLineup() {
           </Card>
         </div>
       </div>
+
+      {/* Player Detail Modal */}
+      <PlayerDetailModal 
+        player={modalPlayer}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }
