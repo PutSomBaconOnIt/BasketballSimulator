@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,8 @@ import { Link } from "wouter";
 import type { Player, Coach } from "@shared/schema";
 
 export function Coaching() {
+  const [manualCoaches, setManualCoaches] = useState<Coach[]>([]);
+  
   const { data: players } = useQuery({
     queryKey: ["/api/players"],
   });
@@ -16,12 +19,33 @@ export function Coaching() {
     queryKey: ["/api/coaches"],
   });
 
+  // Immediate data fetching on mount like roster page
+  useEffect(() => {
+    const fetchCoaches = async () => {
+      try {
+        const coachesRes = await fetch('/api/coaches');
+        const coachesData = await coachesRes.json();
+        setManualCoaches(coachesData);
+        console.log("Coaching - Manual fetch coaches:", coachesData);
+      } catch (error) {
+        console.error("Error fetching coaches:", error);
+      }
+    };
+
+    fetchCoaches();
+  }, []);
+
+  // Use manual coaches as fallback
+  const coachesData = coaches || manualCoaches;
+  
   // Get Lakers players (assuming first team is Lakers)
   const lakersPlayers = players?.filter((p: Player) => p.teamId) || [];
-  const headCoach = coaches?.[0];
+  const headCoach = coachesData?.[0];
 
   // Debug logging
-  console.log("Coaching - Coaches data:", coaches);
+  console.log("Coaching - Query coaches:", coaches);
+  console.log("Coaching - Manual coaches:", manualCoaches);
+  console.log("Coaching - Final coaches data:", coachesData);
   console.log("Coaching - Head coach:", headCoach);
   console.log("Coaching - Loading state:", coachesLoading);
 
