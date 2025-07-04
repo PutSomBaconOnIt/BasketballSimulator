@@ -117,67 +117,97 @@ export function Scouting() {
           </TabsContent>
           
           <TabsContent value="player-database" className="space-y-6 mt-6">
-            <div className="grid grid-cols-1 gap-8">
-              {/* Player Database */}
-              <Card className="bg-card border-border">
-                <CardHeader>
-                  <CardTitle className="text-foreground flex items-center">
-                    <Search className="w-5 h-5 mr-2 text-blue-500" />
-                    Player Database
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-12">
-                    <Search className="w-20 h-20 text-muted-foreground mx-auto mb-6" />
-                    <h3 className="text-xl font-semibold text-foreground mb-3">Search All Players</h3>
-                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                      Browse through all available players in the league. Search by name, position, team, or statistics.
-                    </p>
-                    <div className="flex gap-4 justify-center">
-                      <Button variant="outline">
-                        <Search className="w-4 h-4 mr-2" />
-                        Search Players
-                      </Button>
-                      <Button variant="outline">
-                        <Users className="w-4 h-4 mr-2" />
-                        View All Players
-                      </Button>
-                    </div>
+            {/* Search and Filters */}
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <CardTitle className="text-foreground flex items-center">
+                  <Search className="w-5 h-5 mr-2 text-blue-500" />
+                  Player Database
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder="Search players..."
+                      className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
                   </div>
-                </CardContent>
-              </Card>
+                  
+                  <select className="px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                    <option value="">All Positions</option>
+                    <option value="PG">Point Guard</option>
+                    <option value="SG">Shooting Guard</option>
+                    <option value="SF">Small Forward</option>
+                    <option value="PF">Power Forward</option>
+                    <option value="C">Center</option>
+                  </select>
+                  
+                  <select className="px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                    <option value="">All Teams</option>
+                    <option value="free-agents">Free Agents</option>
+                    <option value="lakers">Lakers</option>
+                  </select>
+                  
+                  <select className="px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                    <option value="overall">Sort by Overall</option>
+                    <option value="age">Sort by Age</option>
+                    <option value="salary">Sort by Salary</option>
+                    <option value="name">Sort by Name</option>
+                  </select>
+                </div>
+                
+                <div className="text-center py-8">
+                  <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-foreground mb-2">Player Results</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Use the filters above to search through all players in the league.
+                  </p>
+                  <div className="flex gap-3 justify-center">
+                    <Button size="sm">
+                      <Search className="w-4 h-4 mr-2" />
+                      Search
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      Clear Filters
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-              {/* Quick Filters */}
-              <Card className="bg-card border-border">
-                <CardHeader>
-                  <CardTitle className="text-foreground">Quick Filters</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <Button variant="outline" className="flex flex-col h-20">
-                      <span className="text-lg font-bold">PG</span>
-                      <span className="text-xs">Point Guards</span>
-                    </Button>
-                    <Button variant="outline" className="flex flex-col h-20">
-                      <span className="text-lg font-bold">SG</span>
-                      <span className="text-xs">Shooting Guards</span>
-                    </Button>
-                    <Button variant="outline" className="flex flex-col h-20">
-                      <span className="text-lg font-bold">SF</span>
-                      <span className="text-xs">Small Forwards</span>
-                    </Button>
-                    <Button variant="outline" className="flex flex-col h-20">
-                      <span className="text-lg font-bold">PF</span>
-                      <span className="text-xs">Power Forwards</span>
-                    </Button>
-                    <Button variant="outline" className="flex flex-col h-20">
-                      <span className="text-lg font-bold">C</span>
-                      <span className="text-xs">Centers</span>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            {/* Quick Position Filters */}
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <CardTitle className="text-foreground text-base">Quick Position Filters</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-5 gap-3">
+                  <Button variant="outline" size="sm" className="flex flex-col h-16 text-xs">
+                    <span className="font-bold">PG</span>
+                    <span className="text-xs text-muted-foreground">Point Guards</span>
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex flex-col h-16 text-xs">
+                    <span className="font-bold">SG</span>
+                    <span className="text-xs text-muted-foreground">Shooting Guards</span>
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex flex-col h-16 text-xs">
+                    <span className="font-bold">SF</span>
+                    <span className="text-xs text-muted-foreground">Small Forwards</span>
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex flex-col h-16 text-xs">
+                    <span className="font-bold">PF</span>
+                    <span className="text-xs text-muted-foreground">Power Forwards</span>
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex flex-col h-16 text-xs">
+                    <span className="font-bold">C</span>
+                    <span className="text-xs text-muted-foreground">Centers</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
