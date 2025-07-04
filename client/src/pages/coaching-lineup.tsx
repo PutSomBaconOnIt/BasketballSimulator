@@ -19,59 +19,82 @@ export function CoachingLineup() {
 
   // Smart minute allocation based on position matching and overall rating
   const allocateBenchMinutes = () => {
-    const starterPositions = startersList.map(player => player.position);
-    const newBenchMinutes = [...benchMinutes];
+    const newBenchMinutes = Array(benchList.length).fill(0);
     
     // Calculate remaining minutes after starters
     const starterTotal = starterMinutes.reduce((a, b) => a + b, 0);
     const remainingMinutes = 240 - starterTotal;
     
-    // Create position priority map based on starters
-    const positionPriority: { [key: string]: number } = {};
-    starterPositions.forEach(pos => {
-      positionPriority[pos] = (positionPriority[pos] || 0) + 1;
-    });
-    
-    // Sort bench players by: 1) Position match priority, 2) Overall rating
-    const benchWithPriority = benchList.map((player, index) => ({
-      player,
-      index,
-      positionPriority: positionPriority[player.position] || 0,
-      overall: player.overall
-    })).sort((a, b) => {
-      if (a.positionPriority !== b.positionPriority) {
-        return b.positionPriority - a.positionPriority; // Higher priority first
+    // Get starter overall ratings by position for comparison
+    const startersByPosition: { [key: string]: number[] } = {};
+    startersList.forEach((player, index) => {
+      if (!startersByPosition[player.position]) {
+        startersByPosition[player.position] = [];
       }
-      return b.overall - a.overall; // Higher overall first
+      startersByPosition[player.position].push(player.overall);
     });
     
-    // Distribute minutes based on priority
-    let minutesToDistribute = Math.min(remainingMinutes, 80); // Max 80 minutes for bench
+    // Calculate each bench player's rating relative to their position starters
+    const benchWithMetrics = benchList.map((player, index) => {
+      const positionStarters = startersByPosition[player.position] || [];
+      const avgStarterRating = positionStarters.length > 0 
+        ? positionStarters.reduce((a, b) => a + b, 0) / positionStarters.length 
+        : 85; // Default if no position match
+      
+      // Calculate rating difference (positive = better than starter average)
+      const ratingDifference = player.overall - avgStarterRating;
+      
+      // Base minutes calculation: higher overall = more minutes
+      // Range: 0-25 minutes based on overall (70-95 range)
+      const baseMinutes = Math.max(0, (player.overall - 70) * 1.0);
+      
+      // Position bonus: +50% minutes if matches starter position
+      const positionBonus = positionStarters.length > 0 ? 1.5 : 1.0;
+      
+      // Rating difference modifier: if close to starter rating, get more minutes
+      const ratingModifier = Math.max(0.3, 1 + (ratingDifference / 20));
+      
+      return {
+        index,
+        player,
+        baseMinutes,
+        positionBonus,
+        ratingModifier,
+        finalScore: baseMinutes * positionBonus * ratingModifier,
+        overall: player.overall
+      };
+    }).sort((a, b) => b.finalScore - a.finalScore);
     
-    // Top tier players (matching positions, high overall)
-    const topTier = benchWithPriority.slice(0, 3);
-    topTier.forEach(({ index }) => {
-      const allocation = Math.min(15, minutesToDistribute);
-      newBenchMinutes[index] = allocation;
-      minutesToDistribute -= allocation;
-    });
+    // Distribute available minutes proportionally based on scores
+    const totalScore = benchWithMetrics.reduce((sum, p) => sum + p.finalScore, 0);
+    let minutesToDistribute = Math.min(remainingMinutes, 80); // Max 80 bench minutes
     
-    // Second tier players (some minutes)
-    const secondTier = benchWithPriority.slice(3, 6);
-    secondTier.forEach(({ index }) => {
-      const allocation = Math.min(8, minutesToDistribute);
-      newBenchMinutes[index] = allocation;
-      minutesToDistribute -= allocation;
-    });
-    
-    // Distribute remaining minutes to top performers
-    let remainingIndex = 0;
-    while (minutesToDistribute > 0 && remainingIndex < benchWithPriority.length) {
-      const { index } = benchWithPriority[remainingIndex];
-      const canAdd = Math.min(5, minutesToDistribute);
-      newBenchMinutes[index] += canAdd;
-      minutesToDistribute -= canAdd;
-      remainingIndex++;
+    if (totalScore > 0) {
+      benchWithMetrics.forEach(({ index, finalScore }) => {
+        // Proportional allocation with minimum 0, maximum 25 per player
+        const proportionalMinutes = (finalScore / totalScore) * minutesToDistribute;
+        const allocatedMinutes = Math.min(25, Math.max(0, Math.round(proportionalMinutes)));
+        newBenchMinutes[index] = allocatedMinutes;
+      });
+      
+      // Fine-tune to exactly hit the target if possible
+      const currentTotal = newBenchMinutes.reduce((a, b) => a + b, 0);
+      const difference = Math.min(minutesToDistribute, 80) - currentTotal;
+      
+      if (difference !== 0) {
+        // Distribute remaining/excess minutes to highest-rated players
+        const sortedIndices = benchWithMetrics
+          .map(({ index }) => index)
+          .slice(0, Math.abs(difference));
+        
+        sortedIndices.forEach(index => {
+          if (difference > 0 && newBenchMinutes[index] < 25) {
+            newBenchMinutes[index] += 1;
+          } else if (difference < 0 && newBenchMinutes[index] > 0) {
+            newBenchMinutes[index] -= 1;
+          }
+        });
+      }
     }
     
     setBenchMinutes(newBenchMinutes);
