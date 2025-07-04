@@ -196,7 +196,7 @@ export function MainMenu() {
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-6">
-              <Link href="/dashboard" className="flex-1">
+              <Link href={selectedTeamId ? `/dashboard?team=${selectedTeamId}` : "/dashboard"} className="flex-1">
                 <Button 
                   className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3"
                   disabled={!selectedTeamId}
@@ -206,7 +206,7 @@ export function MainMenu() {
                 </Button>
               </Link>
               
-              <Link href="/roster" className="flex-1">
+              <Link href={selectedTeamId ? `/roster?team=${selectedTeamId}` : "/roster"} className="flex-1">
                 <Button 
                   variant="outline" 
                   className="w-full border-slate-600 text-white hover:bg-slate-700 py-3"

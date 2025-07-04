@@ -10,11 +10,15 @@ import { Plus, Users, Bus, Dumbbell, Activity, Calendar } from "lucide-react";
 import type { Team, Player, Coach, Training } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useState } from "react";
+import { useLocation } from "wouter";
 
 export function Roster() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedTeamId, setSelectedTeamId] = useState<string>("");
+  const [location] = useLocation();
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const teamFromUrl = urlParams.get('team');
+  const [selectedTeamId, setSelectedTeamId] = useState<string>(teamFromUrl || "");
 
   const { data: teams } = useQuery({
     queryKey: ["/api/teams"],
@@ -28,8 +32,8 @@ export function Roster() {
     queryKey: ["/api/training"],
   });
 
-  // Get user's team based on selection, default to first team
-  const userTeam = teams?.find((team: Team) => team.id === selectedTeamId) || teams?.[0] as Team;
+  // Get user's team based on URL parameter or selection, default to first team
+  const userTeam = teams?.find((team: Team) => team.id === (teamFromUrl || selectedTeamId)) || teams?.[0] as Team;
 
   const { data: players } = useQuery({
     queryKey: ["/api/players/team", userTeam?.id],

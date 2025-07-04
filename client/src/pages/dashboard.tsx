@@ -6,8 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Users, Target, Shield, Smile, Play } from "lucide-react";
 import type { Team, Game } from "@shared/schema";
+import { useLocation } from "wouter";
 
 export function Dashboard() {
+  const [location] = useLocation();
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const selectedTeamId = urlParams.get('team');
+
   const { data: teams } = useQuery({
     queryKey: ["/api/teams"],
   });
@@ -16,8 +21,10 @@ export function Dashboard() {
     queryKey: ["/api/games"],
   });
 
-  // Get user's team (first team for now)
-  const userTeam = teams?.[0] as Team;
+  // Get user's team based on URL parameter or default to first team
+  const userTeam = selectedTeamId 
+    ? teams?.find((team: Team) => team.id === selectedTeamId)
+    : teams?.[0] as Team;
 
   // Get recent games for user's team
   const recentGames = games?.filter((game: Game) => 

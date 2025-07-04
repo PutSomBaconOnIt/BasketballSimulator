@@ -14,25 +14,31 @@ import {
   Zap
 } from "lucide-react";
 
-const navigation = [
-  { name: "Dashboard", href: "/", icon: Home },
-  { name: "Team Roster", href: "/roster", icon: Users },
-  { name: "Player Database", href: "/players", icon: Search },
-  { name: "Draft Room", href: "/draft", icon: Trophy },
-  { name: "Trades", href: "/trades", icon: ArrowLeftRight },
-  { name: "Training", href: "/training", icon: Dumbbell },
-  { name: "Free Agency", href: "/free-agency", icon: Handshake },
-  { name: "Statistics", href: "/statistics", icon: BarChart3 },
-];
+const getNavigation = (teamId?: string) => {
+  const teamParam = teamId ? `?team=${teamId}` : '';
+  return [
+    { name: "Dashboard", href: `/dashboard${teamParam}`, icon: Home },
+    { name: "Team Roster", href: `/roster${teamParam}`, icon: Users },
+    { name: "Player Database", href: `/players${teamParam}`, icon: Search },
+    { name: "Draft Room", href: `/draft${teamParam}`, icon: Trophy },
+    { name: "Trades", href: `/trades${teamParam}`, icon: ArrowLeftRight },
+    { name: "Training", href: `/training${teamParam}`, icon: Dumbbell },
+    { name: "Free Agency", href: `/free-agency${teamParam}`, icon: Handshake },
+    { name: "Statistics", href: `/statistics${teamParam}`, icon: BarChart3 },
+  ];
+};
 
 export function Sidebar() {
   const [location] = useLocation();
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const currentTeamId = urlParams.get('team');
 
   const { data: season } = useQuery({
     queryKey: ["/api/seasons/active"],
   });
 
   const seasonProgress = season ? ((season as any).currentWeek / (season as any).totalWeeks) * 100 : 0;
+  const navigation = getNavigation(currentTeamId || undefined);
 
   return (
     <div className="w-64 bg-sidebar-bg border-r border-border flex flex-col">
