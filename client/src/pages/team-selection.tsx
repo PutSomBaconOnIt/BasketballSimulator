@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,13 +15,28 @@ export function TeamSelection() {
     queryKey: ["/api/teams"],
   });
 
+  // Auto-select Lakers when teams load
+  useEffect(() => {
+    if (teams && !selectedTeamId) {
+      const lakersTeam = teams.find((team: Team) => team.name === "Lakers");
+      if (lakersTeam) {
+        setSelectedTeamId(lakersTeam.id);
+      }
+    }
+  }, [teams, selectedTeamId]);
+
   const selectedTeam = teams?.find((team: Team) => team.id === selectedTeamId);
 
   const handleStartWithTeam = () => {
     if (selectedTeamId) {
+      console.log("Team Selection - Navigating to dashboard with Lakers team:", selectedTeamId);
       setLocation(`/dashboard?team=${selectedTeamId}`);
     }
   };
+
+  console.log("Team Selection - Teams:", teams);
+  console.log("Team Selection - Selected Team ID:", selectedTeamId);
+  console.log("Team Selection - Selected Team:", selectedTeam);
 
   if (isLoading) {
     return (
@@ -44,12 +59,12 @@ export function TeamSelection() {
             <ArrowLeft className="w-5 h-5 mr-2" />
             Back to Main Menu
           </Button>
-          <h1 className="text-4xl font-bold">Choose Your Team</h1>
+          <h1 className="text-4xl font-bold">Start Managing the Lakers</h1>
         </div>
 
         {/* Team Selection */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {teams?.map((team: Team) => (
+        <div className="max-w-2xl mx-auto mb-8">
+          {teams?.filter((team: Team) => team.name === "Lakers").map((team: Team) => (
             <Card 
               key={team.id}
               className={`bg-slate-800/80 border-2 cursor-pointer transition-all hover:bg-slate-700/80 ${
